@@ -46,7 +46,6 @@ public class Main {
                     kitchenMediator.addOrder(order);
                 }, order.getPrepTime() , TimeUnit.SECONDS);
             }
-
             courierExecutor.scheduleAtFixedRate(() -> kitchenMediator.addCourier(CourierFactory.createCourier()), 0, 4, TimeUnit.SECONDS); // Add a new courier every 4 seconds
         } finally {
            executorServiceUtility.shutDownExecutor(orderExecutor);
