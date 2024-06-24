@@ -151,13 +151,12 @@ public class KitchenMediator implements MediatorSubject {
                 // Notify observers of order completion
                 notifyOrderReadyObservers(order);
             }
-        }, 10000);
+        }, 1000);
 
         // Remove order from ready list and driver from waiting list
         readyOrders.remove(order);
         waitingDrivers.remove(driver);
     }
-
 
     /**
      *  Print the Logs for Delivery
