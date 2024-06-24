@@ -1,7 +1,6 @@
 package com.cloud.kitchen;
 
 import com.cloud.kitchen.mediator.KitchenMediator;
-import com.cloud.kitchen.models.Courier;
 import com.cloud.kitchen.models.Order;
 import com.cloud.kitchen.observer.CourierArrivalObserver;
 import com.cloud.kitchen.observer.OrderReadyObserver;
@@ -15,7 +14,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class Main {
 
@@ -36,8 +34,8 @@ public class Main {
         KitchenMediator kitchenMediator = getKitchenMediator();
         ExecutorServiceUtility executorServiceUtility = new ExecutorServiceUtility();
 
-        java.util.concurrent.ScheduledExecutorService orderExecutor = executorServiceUtility.getScheduledExecutorService();
-        java.util.concurrent.ScheduledExecutorService courierExecutor = executorServiceUtility.getScheduledExecutorService();
+        ScheduledExecutorService orderExecutor = executorServiceUtility.getScheduledExecutorService();
+        ScheduledExecutorService courierExecutor = executorServiceUtility.getScheduledExecutorService();
         try {
             for (com.cloud.kitchen.models.Order order : orders) {
                 orderExecutor.schedule(() -> {
