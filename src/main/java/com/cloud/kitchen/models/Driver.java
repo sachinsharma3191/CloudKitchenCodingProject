@@ -1,17 +1,15 @@
 package com.cloud.kitchen.models;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
-public class Courier {
-    private final int courierId;
+public class Driver {
+    private final int driverId;
     private long arrivalTime;
 
-    public Courier(int courierId) {
-        this.courierId = courierId;
+    public Driver(int driverId) {
+        this.driverId = driverId;
     }
 
-    public int getCourierId() {
-        return courierId;
+    public int getDriverId() {
+        return driverId;
     }
 
     public void setArrivalTime(long arrivalTime) {
