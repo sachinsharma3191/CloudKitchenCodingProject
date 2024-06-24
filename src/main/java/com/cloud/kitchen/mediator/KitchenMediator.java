@@ -11,7 +11,6 @@ import com.cloud.kitchen.util.Utility;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Queue;
 import java.util.Timer;
@@ -43,6 +42,10 @@ public class KitchenMediator implements MediatorSubject {
 
     public void setDispatchCommand(OrderDispatcherStrategy dispatchCommand) {
         this.dispatchCommand = dispatchCommand;
+    }
+
+    public Queue<Order> getOrders() {
+        return orders;
     }
 
     public Queue<Order> getReadyOrders() {
@@ -123,7 +126,7 @@ public class KitchenMediator implements MediatorSubject {
     /**
      * Dispatch Orders
      */
-    private void dispatchOrder() {
+    public void dispatchOrder() {
         while (!readyOrders.isEmpty() && !waitingDrivers.isEmpty()) {
             Order order = readyOrders.poll();
             Driver driver = waitingDrivers.poll();
@@ -143,6 +146,9 @@ public class KitchenMediator implements MediatorSubject {
 
         foodWaitTimes.add(foodWaitTime);
         driverWaitTimes.add(driverWaitTime);
+
+        System.out.println(foodWaitTimes + "");
+        System.out.println(driverWaitTimes);
 
         logger.info("Driver {} is picking up order {}. Food wait time: {} minutes", driver.getDriverId(), order.getId(), decimalPrecision(foodWaitTime));
         logger.info("Driver {} waited for {} minutes.", driver.getDriverId(), decimalPrecision(driverWaitTime));
