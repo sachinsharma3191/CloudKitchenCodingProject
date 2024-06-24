@@ -53,8 +53,8 @@ public class Main {
 
             kitchenMediator.printAverages();
         } finally {
-            orderExecutor.shutdown();
-            courierExecutor.shutdown();
+           orderExecutor.shutdown();
+           courierExecutor.shutdown();
         }
     }
 
