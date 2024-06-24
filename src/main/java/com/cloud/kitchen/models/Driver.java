@@ -4,8 +4,13 @@ public class Driver {
     private final int driverId;
     private long arrivalTime;
 
-    public Driver(int driverId) {
+    private Driver(int driverId) {
         this.driverId = driverId;
+        this.arrivalTime = System.currentTimeMillis();
+    }
+
+    public static Driver createDriver(int driverId) {
+        return new Driver(driverId);
     }
 
     public int getDriverId() {

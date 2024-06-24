@@ -7,7 +7,7 @@ public final class DriverFactory {
     private static final AtomicInteger driverId = new AtomicInteger(1);
 
     public static Driver createCourier() {
-        return new Driver(driverId.getAndIncrement());
+        return Driver.createDriver(driverId.getAndIncrement());
     }
 }
 

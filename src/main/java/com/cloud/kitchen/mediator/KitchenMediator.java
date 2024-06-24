@@ -5,6 +5,8 @@ import com.cloud.kitchen.models.Order;
 import com.cloud.kitchen.observer.DriverArrivalObserver;
 import com.cloud.kitchen.observer.MediatorSubject;
 import com.cloud.kitchen.observer.OrderReadyObserver;
+import com.cloud.kitchen.stragety.FifoOrderDispatcherStrategy;
+import com.cloud.kitchen.stragety.OrderDispatcherStrategy;
 import com.cloud.kitchen.util.Utility;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,11 +15,14 @@ import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import java.time.LocalTime;
+
 import static com.cloud.kitchen.util.Utility.decimalPrecision;
 
 public class KitchenMediator implements MediatorSubject {
 
     private final static Logger logger = LogManager.getLogger(KitchenMediator.class);
+
     private final Queue<Order> orders = new ConcurrentLinkedQueue<>();
     private final Queue<Order> readyOrders = new ConcurrentLinkedQueue<>();
     private final Queue<Driver> waitingDrivers = new ConcurrentLinkedQueue<>();
@@ -26,14 +31,14 @@ public class KitchenMediator implements MediatorSubject {
     private final List<OrderReadyObserver> orderReadyObservers = new ArrayList<>();
     private final List<DriverArrivalObserver> driverArrivalObservers = new ArrayList<>();
 
-    private com.cloud.kitchen.stragety.OrderDispatcherStrategy dispatchCommand;
+    private OrderDispatcherStrategy dispatchCommand;
 
     public KitchenMediator() {
         // Default to FIFO strategy
-        this.dispatchCommand = new com.cloud.kitchen.stragety.FifoOrderDispatcherStrategy();
+        this.dispatchCommand = new FifoOrderDispatcherStrategy();
     }
 
-    public void setDispatchCommand(com.cloud.kitchen.stragety.OrderDispatcherStrategy dispatchCommand) {
+    public void setDispatchCommand(OrderDispatcherStrategy dispatchCommand) {
         this.dispatchCommand = dispatchCommand;
     }
 
@@ -73,12 +78,12 @@ public class KitchenMediator implements MediatorSubject {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                order.setReadyTime(System.currentTimeMillis());
+                order.setReadyTime(LocalTime.now().toSecondOfDay());
                 readyOrders.add(order);
                 notifyOrderReadyObservers(order);
                 dispatchOrder();
             }
-        }, order.getPrepTime());
+        },  order.getPrepTime() * 1000L);
     }
 
     /**
@@ -146,7 +151,7 @@ public class KitchenMediator implements MediatorSubject {
                 // Notify observers of order completion
                 notifyOrderReadyObservers(order);
             }
-        }, 1);
+        }, 10000);
 
         // Remove order from ready list and driver from waiting list
         readyOrders.remove(order);
