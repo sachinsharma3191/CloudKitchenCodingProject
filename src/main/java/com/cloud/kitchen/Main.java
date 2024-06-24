@@ -2,6 +2,7 @@ package com.cloud.kitchen;
 
 import com.cloud.kitchen.mediator.KitchenMediator;
 import com.cloud.kitchen.models.Order;
+import com.cloud.kitchen.models.Courier;
 import com.cloud.kitchen.observer.CourierArrivalObserver;
 import com.cloud.kitchen.observer.OrderReadyObserver;
 import com.cloud.kitchen.stragety.MatchedCourierDispatcherStrategy;
@@ -14,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class Main {
 
@@ -37,17 +39,17 @@ public class Main {
         ScheduledExecutorService orderExecutor = executorServiceUtility.getScheduledExecutorService();
         ScheduledExecutorService courierExecutor = executorServiceUtility.getScheduledExecutorService();
         try {
-            for (com.cloud.kitchen.models.Order order : orders) {
+            for (Order order : orders) {
                 orderExecutor.schedule(() -> {
                     order.setReadyTime(System.currentTimeMillis());
                     kitchenMediator.addOrder(order);
-                }, order.getPrepTime(), java.util.concurrent.TimeUnit.SECONDS);
+                }, order.getPrepTime(), TimeUnit.SECONDS);
             }
 
             courierExecutor.scheduleAtFixedRate(() -> {
-                com.cloud.kitchen.models.Courier courier = new com.cloud.kitchen.models.Courier();
+                Courier courier = new Courier();
                 kitchenMediator.addCourier(courier);
-            }, 0, 4, java.util.concurrent.TimeUnit.SECONDS); // Add a new courier every 4 seconds
+            }, 0, 4, TimeUnit.SECONDS); // Add a new courier every 4 seconds
 
             kitchenMediator.printAverages();
         } finally {
