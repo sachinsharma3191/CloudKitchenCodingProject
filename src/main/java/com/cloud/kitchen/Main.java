@@ -14,6 +14,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import java.util.concurrent.TimeUnit;
+import  java.util.concurrent.*;
 import java.util.UUID;
 
 import java.util.concurrent.ExecutorService;
@@ -33,43 +34,36 @@ public class Main {
             System.exit(1);
         }
         logger.info("Processing {}", orders.size());
-        ExecutorService orderExecutor = Executors.newFixedThreadPool(2);
-        ExecutorService courierExecutor = Executors.newFixedThreadPool(2);
+        ScheduledExecutorService orderExecutor = Executors.newScheduledThreadPool(10);
+       ScheduledExecutorService courierExecutor = Executors.newScheduledThreadPool(10);
 
+        int delay = 0;
         for (Order order : orders) {
-            orderExecutor.submit(() -> {
-                try {
-                    Thread.sleep(order.getPrepTime() * 1000);
-                    order.setReadyTime(System.currentTimeMillis());
-                    kitchenMediator.addOrder(order);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            });
+            orderExecutor.schedule(() -> {
+                order.setReadyTime(System.currentTimeMillis());
+                kitchenMediator.addOrder(order);
+            }, delay, TimeUnit.SECONDS);
+            delay += 1;
         }
 
-        courierExecutor.submit(() -> simulateCouriers(kitchenMediator));
-        courierExecutor.submit(() -> simulateCouriers(kitchenMediator));
+        courierExecutor.scheduleAtFixedRate(() -> {
+            Courier courier = new Courier();
+            kitchenMediator.addCourier(courier);
+        }, 0, 4, TimeUnit.SECONDS); // Add a new courier every 4 seconds
 
-        orderExecutor.shutdown();
-        courierExecutor.shutdown();
         try {
-            if (!orderExecutor.awaitTermination(60, TimeUnit.SECONDS)) {
-                orderExecutor.shutdownNow();
-            }
-            if (!courierExecutor.awaitTermination(60, TimeUnit.SECONDS)) {
-                courierExecutor.shutdownNow();
-            }
+            orderExecutor.shutdown();
+            orderExecutor.awaitTermination(60, TimeUnit.SECONDS);
+            courierExecutor.shutdown();
+            courierExecutor.awaitTermination(60, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
-            orderExecutor.shutdownNow();
-            courierExecutor.shutdownNow();
             Thread.currentThread().interrupt();
         }
 
         kitchenMediator.printAverages();
     }
 
-    private static com.cloud.kitchen.mediator.KitchenMediator getKitchenMediator() {
+    private static KitchenMediator getKitchenMediator() {
         KitchenMediator kitchenMediator = new KitchenMediator();
         kitchenMediator.setDispatchCommand(new MatchedCourierDispatcherStrategy());
 
@@ -90,20 +84,5 @@ public class Main {
         kitchenMediator.registerCourierArrivalObserver(courierArrivalObserver);
 
         return kitchenMediator;
-    }
-
-
-    // Method to simulate courier arrivals
-    private static void simulateCouriers(KitchenMediator kitchen) {
-        while (true) {
-            Courier courier = new Courier();
-            try {
-                Thread.sleep((long) (Math.random() * 12000 + 3000));
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                break;
-            }
-            kitchen.addCourier(courier);
-        }
     }
 }

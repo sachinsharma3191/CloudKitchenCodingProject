@@ -13,6 +13,8 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -61,15 +63,16 @@ public class KitchenMediator implements MediatorSubject {
     }
 
     private void prepareOrder(Order order) {
-        try {
-            Thread.sleep(order.getPrepTime()); // Simulate order preparation time in milliseconds
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        order.setReadyTime(System.currentTimeMillis());
-        readyOrders.add(order);
-        notifyOrderReadyObservers(order);
-        dispatchOrders();
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                order.setReadyTime(System.currentTimeMillis());
+                readyOrders.add(order);
+                notifyOrderReadyObservers(order);
+                dispatchOrders();
+            }
+        }, order.getPrepTime() * 1000L);
     }
 
     public void addCourier(Courier courier) {
@@ -120,14 +123,18 @@ public class KitchenMediator implements MediatorSubject {
         logger.info("Courier {} waited for {} ms.", courier.getCourierId(), courierWaitTime);
 
         // Simulate instant delivery
-        try {
-            Thread.sleep(1000); // Simulating delivery time
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                // Notify observers of order completion
+                notifyOrderReadyObservers(order);
+            }
+        }, 1000);
 
-        // Notify observers of order completion
-        notifyOrderReadyObservers(order);
+        // Remove order from ready list and courier from waiting list
+        readyOrders.remove(order);
+        waitingCouriers.remove(courier);
     }
 
     public void printAverages() {
