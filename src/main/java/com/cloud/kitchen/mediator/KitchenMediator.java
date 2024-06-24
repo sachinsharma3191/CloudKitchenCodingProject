@@ -26,22 +26,28 @@ public class KitchenMediator implements MediatorSubject {
 
     private final static Logger logger = LogManager.getLogger(KitchenMediator.class);
 
-    private final Queue<Order> orders = new ConcurrentLinkedQueue<>();
-    private final Queue<Order> readyOrders = new ConcurrentLinkedQueue<>();
-    private final Queue<Driver> waitingDrivers = new ConcurrentLinkedQueue<>();
-    private final List<Double> foodWaitTimes = new CopyOnWriteArrayList<>();
-    private final List<Double> driverWaitTimes = new CopyOnWriteArrayList<>();
-    private final List<OrderReadyObserver> orderReadyObservers = new CopyOnWriteArrayList<>();
-    private final List<DriverArrivalObserver> driverArrivalObservers = new CopyOnWriteArrayList<>();
-
-    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-
-
+    private final Queue<Order> orders;
+    private final Queue<Order> readyOrders;
+    private final Queue<Driver> waitingDrivers;
+    private final List<Double> foodWaitTimes;
+    private final List<Double> driverWaitTimes;
+    private final List<OrderReadyObserver> orderReadyObservers;
+    private final List<DriverArrivalObserver> driverArrivalObservers;
+    private final ScheduledExecutorService scheduler;
     private OrderDispatcherStrategy dispatchCommand;
 
     public KitchenMediator() {
+
+        this.orders = new ConcurrentLinkedQueue<>();
+        this.readyOrders = new ConcurrentLinkedQueue<>();
+        this.waitingDrivers = new ConcurrentLinkedQueue<>();
+        this.foodWaitTimes = new CopyOnWriteArrayList<>();
+        this.driverWaitTimes = new CopyOnWriteArrayList<>();
+        this.orderReadyObservers = new CopyOnWriteArrayList<>();
+        this.driverArrivalObservers = new CopyOnWriteArrayList<>();
         // Default to FIFO strategy
         this.dispatchCommand = new FifoOrderDispatcherStrategy();
+        this.scheduler = Executors.newSingleThreadScheduledExecutor();
     }
 
     public void setDispatchCommand(OrderDispatcherStrategy dispatchCommand) {
