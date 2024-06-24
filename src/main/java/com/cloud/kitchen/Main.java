@@ -1,24 +1,24 @@
 package com.cloud.kitchen;
 
-import java.util.List;
-
 import com.cloud.kitchen.mediator.KitchenMediator;
 import com.cloud.kitchen.models.Courier;
 import com.cloud.kitchen.models.Order;
-import com.cloud.kitchen.util.JsonUtility;
 import com.cloud.kitchen.observer.CourierArrivalObserver;
 import com.cloud.kitchen.observer.OrderReadyObserver;
 import com.cloud.kitchen.stragety.MatchedCourierDispatcherStrategy;
+import com.cloud.kitchen.util.JsonUtility;
 import com.cloud.kitchen.util.Utility;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import java.util.concurrent.TimeUnit;
-import  java.util.concurrent.*;
-import java.util.UUID;
 
-import java.util.concurrent.ExecutorService;
+import java.util.List;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+
+import com.cloud.kitchen.util.ExecutorServiceUtility;
+
+import java.util.concurrent.TimeUnit;
 
 public class Main {
 
@@ -29,38 +29,36 @@ public class Main {
 
         // Executor service for simulating orders and couriers
         List<Order> orders = JsonUtility.readOrders();
+        logger.info("Processing {}", orders.size());
         if(CollectionUtils.isEmpty(orders)) {
             logger.error("Empty Orders");
-            System.exit(1);
         }
         logger.info("Processing {}", orders.size());
-        ScheduledExecutorService orderExecutor = Executors.newScheduledThreadPool(10);
-       ScheduledExecutorService courierExecutor = Executors.newScheduledThreadPool(10);
 
-        int delay = 0;
-        for (Order order : orders) {
-            orderExecutor.schedule(() -> {
-                order.setReadyTime(System.currentTimeMillis());
-                kitchenMediator.addOrder(order);
-            }, delay, TimeUnit.SECONDS);
-            delay += 1;
-        }
+        ExecutorServiceUtility executorServiceUtility = new ExecutorServiceUtility();
 
-        courierExecutor.scheduleAtFixedRate(() -> {
-            Courier courier = new Courier();
-            kitchenMediator.addCourier(courier);
-        }, 0, 4, TimeUnit.SECONDS); // Add a new courier every 4 seconds
-
+        ScheduledExecutorService orderExecutor = executorServiceUtility.getScheduledExecutorService();
+        ScheduledExecutorService courierExecutor = executorServiceUtility.getScheduledExecutorService();
         try {
+            for (Order order : orders) {
+                orderExecutor.schedule(() -> {
+                    order.setReadyTime(System.currentTimeMillis());
+                    kitchenMediator.addOrder(order);
+                }, order.getPrepTime(), TimeUnit.SECONDS);
+            }
+
+            courierExecutor.scheduleAtFixedRate(() -> {
+                Courier courier = new Courier();
+                kitchenMediator.addCourier(courier);
+            }, 0, 4, TimeUnit.SECONDS); // Add a new courier every 4 seconds
+
+            kitchenMediator.printAverages();
+        } finally {
             orderExecutor.shutdown();
-            orderExecutor.awaitTermination(60, TimeUnit.SECONDS);
             courierExecutor.shutdown();
-            courierExecutor.awaitTermination(60, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
         }
 
-        kitchenMediator.printAverages();
+
     }
 
     private static KitchenMediator getKitchenMediator() {
