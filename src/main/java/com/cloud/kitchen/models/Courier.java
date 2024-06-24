@@ -3,13 +3,8 @@ package com.cloud.kitchen.models;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Courier {
-    private static AtomicInteger courierIdCounter = new AtomicInteger(1);
     private final int courierId;
     private long arrivalTime;
-
-    public Courier() {
-        this.courierId = courierIdCounter.incrementAndGet();
-    }
 
     public Courier(int courierId) {
         this.courierId = courierId;

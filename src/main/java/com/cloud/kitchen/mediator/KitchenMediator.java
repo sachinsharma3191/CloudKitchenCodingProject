@@ -17,16 +17,16 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
+import com.cloud.kitchen.util.Utility;
 
 public class KitchenMediator implements MediatorSubject {
 
     private final static Logger logger = LogManager.getLogger(KitchenMediator.class);
-
     private final Queue<Order> orders = new ConcurrentLinkedQueue<>();
     private final Queue<Order> readyOrders = new ConcurrentLinkedQueue<>();
     private final Queue<Courier> waitingCouriers = new ConcurrentLinkedQueue<>();
-    private final List<Long> foodWaitTimes = new CopyOnWriteArrayList<>();
-    private final List<Long> courierWaitTimes = new CopyOnWriteArrayList<>();
+    private final List<Double> foodWaitTimes = new CopyOnWriteArrayList<>();
+    private final List<Double> courierWaitTimes = new CopyOnWriteArrayList<>();
     private final List<OrderReadyObserver> orderReadyObservers = new ArrayList<>();
     private final List<CourierArrivalObserver> courierArrivalObservers = new ArrayList<>();
 
@@ -49,11 +49,11 @@ public class KitchenMediator implements MediatorSubject {
         return waitingCouriers;
     }
 
-    public List<Long> getFoodWaitTimes() {
+    public List<Double> getFoodWaitTimes() {
         return foodWaitTimes;
     }
 
-    public List<Long> getCourierWaitTimes() {
+    public List<Double> getCourierWaitTimes() {
         return courierWaitTimes;
     }
 
@@ -93,35 +93,30 @@ public class KitchenMediator implements MediatorSubject {
 
     @Override
     public void notifyOrderReadyObservers(Order order) {
-        for (OrderReadyObserver observer : orderReadyObservers) {
-            observer.onOrderReady(order);
-        }
+        orderReadyObservers.forEach(observer -> observer.onOrderReady(order));
     }
 
     @Override
     public void notifyCourierArrivalObservers(Courier courier) {
-        for (CourierArrivalObserver observer : courierArrivalObservers) {
-            observer.onCourierArrival(courier);
-        }
+        courierArrivalObservers.forEach(observer -> observer.onCourierArrival(courier));
     }
 
     private void dispatchOrders() {
         while (!readyOrders.isEmpty() && !waitingCouriers.isEmpty()) {
             Order order = readyOrders.poll();
             Courier courier = waitingCouriers.poll();
-
             dispatchCourier(order, courier);
         }
     }
 
     public void dispatchCourier(Order order, Courier courier) {
-        long foodWaitTime = System.currentTimeMillis() - order.getReadyTime();
+        double foodWaitTime = Utility.convertToMinutes(System.currentTimeMillis() - order.getReadyTime());
         foodWaitTimes.add(foodWaitTime);
-        logger.info("Courier {} is picking up order {}. Food wait time: {} ms", courier.getCourierId(), order.getId(), foodWaitTime);
+        logger.info("Courier {} is picking up order {}. Food wait time: {} minutes", courier.getCourierId(), order.getId(), foodWaitTime);
 
-        long courierWaitTime = System.currentTimeMillis() - courier.getArrivalTime();
+        double courierWaitTime = Utility.convertToMinutes(System.currentTimeMillis() - courier.getArrivalTime());
         courierWaitTimes.add(courierWaitTime);
-        logger.info("Courier {} waited for {} ms.", courier.getCourierId(), courierWaitTime);
+        logger.info("Courier {} waited for {} minutes.", courier.getCourierId(), courierWaitTime);
 
         // Simulate instant delivery
         Timer timer = new Timer();
@@ -139,11 +134,8 @@ public class KitchenMediator implements MediatorSubject {
     }
 
     public void printAverages() {
-        double avgFoodWaitTime = foodWaitTimes.stream().mapToLong(Long::longValue).average().orElse(0);
-        double avgCourierWaitTime = courierWaitTimes.stream().mapToLong(Long::longValue).average().orElse(0);
-
         logger.info("\nAverage statistics:");
-        logger.info("Average food wait time: {} ms", avgFoodWaitTime);
-        logger.info("Average courier wait time: {} ms ", avgCourierWaitTime);
+        logger.info("Average food wait time: {} minutes", Utility.average(foodWaitTimes));
+        logger.info("Average courier wait time: {} minutes ", Utility.average(courierWaitTimes));
     }
 }
