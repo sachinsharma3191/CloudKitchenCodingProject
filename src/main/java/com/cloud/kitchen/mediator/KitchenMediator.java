@@ -72,7 +72,7 @@ public class KitchenMediator implements MediatorSubject {
                 notifyOrderReadyObservers(order);
                 dispatchOrders();
             }
-        }, order.getPrepTime() * 1000L);
+        }, order.getPrepTime());
     }
 
     public void addCourier(Courier courier) {
@@ -109,6 +109,7 @@ public class KitchenMediator implements MediatorSubject {
         while (!readyOrders.isEmpty() && !waitingCouriers.isEmpty()) {
             Order order = readyOrders.poll();
             Courier courier = waitingCouriers.poll();
+
             dispatchCourier(order, courier);
         }
     }
@@ -130,7 +131,7 @@ public class KitchenMediator implements MediatorSubject {
                 // Notify observers of order completion
                 notifyOrderReadyObservers(order);
             }
-        }, 1000);
+        }, 1);
 
         // Remove order from ready list and courier from waiting list
         readyOrders.remove(order);
