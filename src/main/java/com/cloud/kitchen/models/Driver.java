@@ -20,7 +20,7 @@ public class Driver {
         return arrivalTime;
     }
 
-    // Method to check if the courier matches a specific order
+    // Method to check if the driver matches a specific order
     public boolean matchesOrder(Order order) {
         return true;
     }

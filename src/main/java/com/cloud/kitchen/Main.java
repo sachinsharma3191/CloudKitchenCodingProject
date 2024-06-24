@@ -3,9 +3,8 @@ package com.cloud.kitchen;
 import com.cloud.kitchen.factory.DriverFactory;
 import com.cloud.kitchen.mediator.KitchenMediator;
 import com.cloud.kitchen.models.Order;
-import com.cloud.kitchen.observer.CourierArrivalObserver;
 import com.cloud.kitchen.observer.OrderReadyObserver;
-import com.cloud.kitchen.stragety.MatchedCourierDispatcherStrategy;
+import com.cloud.kitchen.observer.DriverArrivalObserver;
 import com.cloud.kitchen.util.ExecutorServiceUtility;
 import com.cloud.kitchen.util.JsonUtility;
 import com.cloud.kitchen.util.Utility;
@@ -15,6 +14,10 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
+
+import  com.cloud.kitchen.stragety.MatchedOrderDispatcherStrategy;
+
+import static com.cloud.kitchen.util.Utility.decimalPrecision;
 
 public class Main {
 
@@ -29,7 +32,7 @@ public class Main {
         }
         logger.info("Processing {} Orders", orders.size());
         processOrders(orders, kitchenMediator);
-        kitchenMediator.setDispatchCommand(new MatchedCourierDispatcherStrategy());
+        kitchenMediator.setDispatchCommand(new MatchedOrderDispatcherStrategy());
         kitchenMediator.printAverages();
     }
 
@@ -42,13 +45,13 @@ public class Main {
     private static void processOrders(List<Order> orders, KitchenMediator kitchenMediator) {
         ExecutorServiceUtility executorServiceUtility = new ExecutorServiceUtility();
         ScheduledExecutorService orderExecutor = executorServiceUtility.getScheduledExecutorService();
-        ScheduledExecutorService courierExecutor = executorServiceUtility.getScheduledExecutorService();
+        ScheduledExecutorService driverExecutor = executorServiceUtility.getScheduledExecutorService();
         try {
             simulateOrdersSubmission(orders, kitchenMediator, orderExecutor);
-            simulateOrderDelivery(kitchenMediator, courierExecutor);
+            simulateDriverSubmission(kitchenMediator, driverExecutor);
         } finally {
             executorServiceUtility.shutDownExecutor(orderExecutor);
-            executorServiceUtility.shutDownExecutor(courierExecutor);
+            executorServiceUtility.shutDownExecutor(driverExecutor);
         }
     }
 
@@ -56,10 +59,10 @@ public class Main {
      * Simulating Driver added for Order Delivery
      *
      * @param kitchenMediator Object of KitchenMediator Class Processing Orders
-     * @param courierExecutorService Executor Simulating Driver added for Order Delivery
+     * @param driverExecutorService Executor Simulating Driver added for Order Delivery
      */
-    private static void simulateOrderDelivery(KitchenMediator kitchenMediator, ScheduledExecutorService courierExecutorService) {
-        courierExecutorService.scheduleAtFixedRate(() -> kitchenMediator.addDriver(DriverFactory.createCourier()), 0, 4, java.util.concurrent.TimeUnit.SECONDS); // Add a new courier every 4 seconds
+    private static void simulateDriverSubmission(KitchenMediator kitchenMediator, ScheduledExecutorService driverExecutorService) {
+        driverExecutorService.scheduleAtFixedRate(() -> kitchenMediator.addDriver(DriverFactory.createCourier()), 0, 4, java.util.concurrent.TimeUnit.SECONDS); // Add a new driver every 4 seconds
     }
 
     /**
@@ -84,21 +87,21 @@ public class Main {
     private static KitchenMediator getKitchenMediator() {
         KitchenMediator kitchenMediator = new KitchenMediator();
 
-        // Register observers for order readiness and courier arrival
+        // Register observers for order readiness and driver arrival
         OrderReadyObserver orderReadyObserver = order -> {
             double foodWaitTime = Utility.convertToMinutes(System.currentTimeMillis() - order.getReadyTime());
             kitchenMediator.getFoodWaitTimes().add(foodWaitTime);
-            logger.info("Order {} is ready.Food wait time: {} minutes", order.getId(), foodWaitTime);
+            logger.info("Order {} is ready.Food wait time: {} minutes", order.getId(), decimalPrecision(foodWaitTime));
         };
 
-        CourierArrivalObserver courierArrivalObserver = courier -> {
-            double courierWaitTime = Utility.convertToMinutes(System.currentTimeMillis() - courier.getArrivalTime());
-            kitchenMediator.getCourierWaitTimes().add(courierWaitTime);
-            logger.info("Driver {} has arrived.Driver wait time: {} minutes.", courier.getDriverId(), courierWaitTime);
+        DriverArrivalObserver driverArrivalObserver = driver -> {
+            double driverWaitTime = Utility.convertToMinutes(System.currentTimeMillis() - driver.getArrivalTime());
+            kitchenMediator.getDriverWaitTimes().add(driverWaitTime);
+            logger.info("Driver {} has arrived.Driver wait time: {} minutes.", driver.getDriverId(), decimalPrecision(driverWaitTime));
         };
 
         kitchenMediator.registerOrderReadyObserver(orderReadyObserver);
-        kitchenMediator.registerCourierArrivalObserver(courierArrivalObserver);
+        kitchenMediator.registerDriverArrivalObserver(driverArrivalObserver);
 
         return kitchenMediator;
     }
