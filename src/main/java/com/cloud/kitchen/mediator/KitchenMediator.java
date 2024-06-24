@@ -11,12 +11,15 @@ import com.cloud.kitchen.util.Utility;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.*;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Queue;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import java.time.LocalTime;
-
+import static com.cloud.kitchen.util.Utility.average;
 import static com.cloud.kitchen.util.Utility.decimalPrecision;
 
 public class KitchenMediator implements MediatorSubject {
@@ -28,8 +31,8 @@ public class KitchenMediator implements MediatorSubject {
     private final Queue<Driver> waitingDrivers = new ConcurrentLinkedQueue<>();
     private final List<Double> foodWaitTimes = new CopyOnWriteArrayList<>();
     private final List<Double> driverWaitTimes = new CopyOnWriteArrayList<>();
-    private final List<OrderReadyObserver> orderReadyObservers = new ArrayList<>();
-    private final List<DriverArrivalObserver> driverArrivalObservers = new ArrayList<>();
+    private final List<OrderReadyObserver> orderReadyObservers = new CopyOnWriteArrayList<>();
+    private final List<DriverArrivalObserver> driverArrivalObservers = new CopyOnWriteArrayList<>();
 
     private OrderDispatcherStrategy dispatchCommand;
 
@@ -60,8 +63,8 @@ public class KitchenMediator implements MediatorSubject {
 
     /**
      * Add Order to Queue for Processing
-     * 
-     * @param order Object containing detail of Order 
+     *
+     * @param order Object containing detail of Order
      */
     public void addOrder(Order order) {
         orders.add(order);
@@ -70,26 +73,26 @@ public class KitchenMediator implements MediatorSubject {
 
     /**
      * Prepare Order
-     * 
-     * @param order Object containing detail of Order 
+     *
+     * @param order Object containing detail of Order
      */
     private void prepareOrder(Order order) {
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                order.setReadyTime(LocalTime.now().toSecondOfDay());
+                order.setReadyTime(System.currentTimeMillis());
                 readyOrders.add(order);
                 notifyOrderReadyObservers(order);
                 dispatchOrder();
             }
-        },  order.getPrepTime() * 1000L);
+        }, order.getPrepTime() * 1000L);
     }
 
     /**
      * Add Delivery Driver to Queue of Waiting Delivery Drives
-     * 
-     * @param driver  Object containing detail of Driver
+     *
+     * @param driver Object containing detail of Driver
      */
     public void addDriver(Driver driver) {
         waitingDrivers.add(driver);
@@ -103,7 +106,7 @@ public class KitchenMediator implements MediatorSubject {
     }
 
     @Override
-    public void registerDriverArrivalObserver(com.cloud.kitchen.observer.DriverArrivalObserver observer) {
+    public void registerDriverArrivalObserver(DriverArrivalObserver observer) {
         driverArrivalObservers.add(observer);
     }
 
@@ -118,7 +121,7 @@ public class KitchenMediator implements MediatorSubject {
     }
 
     /**
-     *  Dispatch Orders
+     * Dispatch Orders
      */
     private void dispatchOrder() {
         while (!readyOrders.isEmpty() && !waitingDrivers.isEmpty()) {
@@ -129,18 +132,19 @@ public class KitchenMediator implements MediatorSubject {
     }
 
     /**
-     * Dispatch the Orders and Log the time  
-     *  
-     * @param order     Object containing detail of Order
-     * @param driver  Object containing detail of Driver
+     * Dispatch the Orders and Log the time
+     *
+     * @param order Object containing detail of Order
+     * @param driver Object containing detail of Driver
      */
     public void dispatchOrder(Order order, Driver driver) {
         double foodWaitTime = Utility.convertToMinutes(System.currentTimeMillis() - order.getReadyTime());
-        foodWaitTimes.add(foodWaitTime);
-        logger.info("Driver {} is picking up order {}. Food wait time: {} minutes", driver.getDriverId(), order.getId(), decimalPrecision(foodWaitTime));
-
         double driverWaitTime = Utility.convertToMinutes(System.currentTimeMillis() - driver.getArrivalTime());
+
+        foodWaitTimes.add(foodWaitTime);
         driverWaitTimes.add(driverWaitTime);
+
+        logger.info("Driver {} is picking up order {}. Food wait time: {} minutes", driver.getDriverId(), order.getId(), decimalPrecision(foodWaitTime));
         logger.info("Driver {} waited for {} minutes.", driver.getDriverId(), decimalPrecision(driverWaitTime));
 
         // Simulate instant delivery
@@ -159,11 +163,11 @@ public class KitchenMediator implements MediatorSubject {
     }
 
     /**
-     *  Print the Logs for Delivery
+     * Print the Logs for Delivery
      */
     public void printAverages() {
-        logger.info("\nAverage statistics:");
-        logger.info("Average food wait time: {} minutes", Utility.average(foodWaitTimes));
-        logger.info("Average Driver wait time: {} minutes ", Utility.average(driverWaitTimes));
+        logger.info("Average statistics:");
+        logger.info("Average food wait time: {} minutes", average(foodWaitTimes));
+        logger.info("Average Driver wait time: {} minutes ", average(driverWaitTimes));
     }
 }
