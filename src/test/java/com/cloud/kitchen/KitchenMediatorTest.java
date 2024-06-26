@@ -8,9 +8,9 @@ import com.cloud.kitchen.models.Courier;
 import com.cloud.kitchen.models.Order;
 import com.cloud.kitchen.observer.CourierArrivalObserver;
 import com.cloud.kitchen.observer.OrderReadyObserver;
-import com.cloud.kitchen.stragety.OrderDispatcherStrategy;
-import com.cloud.kitchen.stragety.MatchedOrderDispatcherStrategy;
-import com.cloud.kitchen.stragety.FifoOrderDispatcherStrategy;
+import com.cloud.kitchen.strategy.OrderDispatcherStrategy;
+import com.cloud.kitchen.strategy.MatchedOrderDispatcherStrategy;
+import com.cloud.kitchen.strategy.FifoOrderDispatcherStrategy;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

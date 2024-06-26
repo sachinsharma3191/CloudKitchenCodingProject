@@ -5,8 +5,8 @@ import com.cloud.kitchen.models.Order;
 import com.cloud.kitchen.observer.CourierArrivalObserver;
 import com.cloud.kitchen.observer.MediatorSubject;
 import com.cloud.kitchen.observer.OrderReadyObserver;
-import com.cloud.kitchen.stragety.FifoOrderDispatcherStrategy;
-import com.cloud.kitchen.stragety.OrderDispatcherStrategy;
+import com.cloud.kitchen.strategy.FifoOrderDispatcherStrategy;
+import com.cloud.kitchen.strategy.OrderDispatcherStrategy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

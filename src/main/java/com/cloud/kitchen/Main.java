@@ -4,7 +4,7 @@ import com.cloud.kitchen.mediator.KitchenMediator;
 import com.cloud.kitchen.observer.OrderReadyObserver;
 import com.cloud.kitchen.observer.CourierArrivalObserver;
 import com.cloud.kitchen.simulation.Simulation;
-import com.cloud.kitchen.stragety.MatchedOrderDispatcherStrategy;
+import com.cloud.kitchen.strategy.MatchedOrderDispatcherStrategy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

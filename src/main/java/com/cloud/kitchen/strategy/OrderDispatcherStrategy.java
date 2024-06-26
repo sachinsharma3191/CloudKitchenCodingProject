@@ -1,4 +1,4 @@
-package com.cloud.kitchen.stragety;
+package com.cloud.kitchen.strategy;
 
 import com.cloud.kitchen.models.Courier;
 import com.cloud.kitchen.models.Order;

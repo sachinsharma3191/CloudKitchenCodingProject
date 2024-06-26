@@ -1,4 +1,4 @@
-package com.cloud.kitchen.stragety;
+package com.cloud.kitchen.strategy;
 
 import com.cloud.kitchen.models.Courier;
 import com.cloud.kitchen.models.Order;
@@ -6,9 +6,11 @@ import com.cloud.kitchen.mediator.KitchenMediator;
 import java.util.Queue;
 
 /**
- * Implements the Matched dispatch strategy, where each courier is matched with a specific order.
+ * The FIFODispatchCommand class implements the OrderDispatcherStrategy interface
+ * for dispatching orders in a first-in-first-out manner.
  */
-public class MatchedOrderDispatcherStrategy implements OrderDispatcherStrategy {
+public class FifoOrderDispatcherStrategy implements OrderDispatcherStrategy {
+
     /**
      * Dispatches orders to available couriers based on the FIFO strategy.
      *
@@ -17,8 +19,8 @@ public class MatchedOrderDispatcherStrategy implements OrderDispatcherStrategy {
      * @param waitingCouriers The queue of couriers waiting to pick up orders.
      */
     @Override
-    public void dispatchOrder(KitchenMediator mediator, Queue<Order> readyOrders, Queue<Courier> waitingCouriers) {
-        /*
+    public void dispatchOrder(KitchenMediator mediator, Queue<Order> readyOrders,Queue<Courier> waitingCouriers) {
+         /*
         This loop runs as long as there are couriers in the waitingCouriers queue.
         It polls (removes and returns) the next courier from the waitingCouriers queue.
         It then attempts to poll the next order from the readyOrders queue using mediator.getReadyOrders().poll().
@@ -35,7 +37,6 @@ public class MatchedOrderDispatcherStrategy implements OrderDispatcherStrategy {
                 break; // Exit the loop if no orders are available
             }
         }
-
         /*
         This loop runs as long as there are orders in the readyOrders queue and couriers in the waitingCouriers queue.
         It polls the next order from the readyOrders queue.
