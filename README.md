@@ -68,7 +68,7 @@ To run the project, follow these steps:
 Replace target/kitchen-delivery-system.jar with the actual path to the generated JAR file if it differs.
 
     ```bash
-   java -cp target/kitchen-delivery-system.jar com.cloud.kitchen.Main
+   java -cp target/CloudKitchenCodingProject-1.0.jar com.cloud.kitchen.Main
 
 4. **Testing:**
 Unit tests are available in the src/test directory. You can run them using Maven:
