@@ -1,6 +1,7 @@
 package com.cloud.kitchen;
 
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
 
 import com.cloud.kitchen.models.Courier;
 import com.cloud.kitchen.models.Order;
@@ -162,13 +163,31 @@ class KitchenMediatorTest {
     void testCourierWaitTimeCalculation() throws InterruptedException {
         kitchenMediator.setDispatchCommand(fifoStrategy);
 
-        Order order = new Order(UUID.randomUUID().toString(),"Burger", 6);
+        Order order = new Order(UUID.randomUUID().toString(), "Burger", 6);
         Courier courier = new Courier(1);
 
+        // Use CountDownLatch for synchronization
+        CountDownLatch orderReadyLatch = new CountDownLatch(1);
+
+        // Register an observer to monitor when the order is ready
+        OrderReadyObserver orderReadyObserver = o -> {
+            if (o.getId().equals(order.getId())) {
+                orderReadyLatch.countDown();
+            }
+        };
+        kitchenMediator.registerOrderReadyObserver(orderReadyObserver);
+
+        // Add order and courier
         kitchenMediator.addOrder(order);
         kitchenMediator.addCourier(courier);
 
-        TimeUnit.SECONDS.sleep(2); // Wait for the order to be prepared
+        // Wait for the order to be prepared or timeout after 10 seconds
+        assertTrue(orderReadyLatch.await(10, TimeUnit.SECONDS), "Order preparation timeout");
+
+        // Wait until the courier has picked up the order or timeout after 10 seconds
+        while (!kitchenMediator.getReadyOrders().isEmpty()) {
+            TimeUnit.MILLISECONDS.sleep(100); // Check every 100 milliseconds
+        }
 
         double courierWaitTime = kitchenMediator.getCourierWaitTimes().getFirst();
         assertTrue(courierWaitTime >= 0);
