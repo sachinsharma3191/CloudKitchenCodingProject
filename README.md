@@ -65,7 +65,7 @@ To run the project, follow these steps:
    mvn clean install
 
 3. **Run the main application:**
-Replace target/kitchen-delivery-system.jar with the actual path to the generated JAR file if it differs.
+Replace target/CloudKitchenCodingProject-1.0.jar with the actual path to the generated JAR file if it differs.
 
     ```bash
    java -cp target/CloudKitchenCodingProject-1.0.jar com.cloud.kitchen.Main
