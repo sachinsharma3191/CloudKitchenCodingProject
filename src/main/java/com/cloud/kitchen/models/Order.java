@@ -5,16 +5,19 @@ import java.util.Objects;
 public class Order {
     private String id;
     private String name;
+    private long orderReceivedTime;
     private int prepTime;
     private long readyTime;
 
     public Order() {
     }
 
-    public Order(String id, String name, int prepTime) {
+    public Order(String id, String name, int prepTime,long readyTime) {
         this.id = id;
         this.name = name;
         this.prepTime = prepTime;
+        this.readyTime = readyTime;
+        this.orderReceivedTime = System.currentTimeMillis();
     }
 
     public String getId() {

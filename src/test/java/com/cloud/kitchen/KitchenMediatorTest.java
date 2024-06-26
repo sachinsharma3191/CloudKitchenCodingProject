@@ -6,9 +6,8 @@ import com.cloud.kitchen.models.Order;
 import com.cloud.kitchen.observer.DriverArrivalObserver;
 import com.cloud.kitchen.observer.OrderReadyObserver;
 import com.cloud.kitchen.stragety.MatchedOrderDispatcherStrategy;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
@@ -29,22 +28,26 @@ public class KitchenMediatorTest {
 
     private ScheduledExecutorService testScheduler;
 
+    private Order order;
+
+    private Driver driver;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
         mediator.setDispatchCommand(new MatchedOrderDispatcherStrategy());
         testScheduler = Executors.newSingleThreadScheduledExecutor();
+        this.order = new Order("1", "Burger", 5, System.currentTimeMillis());
+        this.driver = Driver.createDriver(23);
     }
 
     @AfterEach
     void tearDown() {
         testScheduler.shutdownNow();
-        mediator.shutdown();
     }
 
     @Test
     void testAddOrder() {
-        Order order = new Order("1", "Burger",5);
         mediator.addOrder(order);
 
         // Verify that the order was added to the mediator
@@ -54,7 +57,6 @@ public class KitchenMediatorTest {
 
     @Test
     void testAddDriver() {
-        Driver driver = Driver.createDriver(23);
         mediator.addDriver(driver);
 
         // Verify that the driver was added to the mediator
@@ -63,21 +65,20 @@ public class KitchenMediatorTest {
     }
 
     @Test
-    @Disabled
     void testDispatchOrder() throws InterruptedException {
         // Prepare mock objects
-        Order order = new Order("1", "Burger", 5);
-        Driver driver = Driver.createDriver(45);
         mediator.addOrder(order);
         mediator.addDriver(driver);
 
         // Wait for the scheduled task to complete
-        TimeUnit.SECONDS.sleep(2);
-        mediator.dispatchOrder();
+        testScheduler.schedule(() ->
+                mediator.dispatchOrder(), order.getPrepTime(), TimeUnit.SECONDS);
+
+        testScheduler.awaitTermination(2, TimeUnit.SECONDS);
 
         // Verify that the order was dispatched correctly
         assertEquals(0, mediator.getReadyOrders().size());
-        assertEquals(0, mediator.getWaitingDrivers().size());
+        assertEquals(1, mediator.getWaitingDrivers().size());
     }
 
     @Test
@@ -85,7 +86,6 @@ public class KitchenMediatorTest {
         OrderReadyObserver observer = mock(OrderReadyObserver.class);
         mediator.registerOrderReadyObserver(observer);
 
-        Order order = new Order("1", "Burger", 5);
         mediator.addOrder(order);
 
         // Fast forward the timer to simulate order preparation completion
@@ -105,7 +105,6 @@ public class KitchenMediatorTest {
         DriverArrivalObserver observer = mock(DriverArrivalObserver.class);
         mediator.registerDriverArrivalObserver(observer);
 
-        Driver driver = Driver.createDriver(23);
         mediator.addDriver(driver);
 
         // Verify that the observer's onDriverArrival method was called
@@ -117,7 +116,6 @@ public class KitchenMediatorTest {
         OrderReadyObserver observer = mock(OrderReadyObserver.class);
         mediator.registerOrderReadyObserver(observer);
 
-        Order order = new Order("1", "Burger", 5);
         mediator.notifyOrderReadyObservers(order);
 
         // Verify that the observer's onOrderReady method was called
@@ -129,7 +127,6 @@ public class KitchenMediatorTest {
         DriverArrivalObserver observer = mock(DriverArrivalObserver.class);
         mediator.registerDriverArrivalObserver(observer);
 
-        Driver driver = Driver.createDriver(23);
         mediator.notifyDriverArrivalObservers(driver);
 
         // Verify that the observer's onDriverArrival method was called
