@@ -41,7 +41,7 @@ Add the following lines to your ~/.bash_profile or ~/.bashrc file:
 Run source ~/.bash_profile or source ~/.bashrc to apply the changes in the current terminal.
 
 
-## Setup and Execution
+## CLI Setup and Execution
 
 To run the project, follow these steps:
 
@@ -86,3 +86,39 @@ If any errors occur during setup or execution, check Maven dependencies and ensu
 
 7.  **Customization:**
 Modify dispatch strategies (FifoOrderDispatcherStrategy, MatchedOrderDispatcherStrategy) or add new strategies in com.cloud.kitchen.stragety package as per your requirements.
+
+
+# Intellij Set up and Execution
+
+### Prerequisites
+- Java Development Kit (JDK): Version 8 or above. You can download it from Oracle's JDK website or use OpenJDK
+- Maven build tool installed
+
+## Download and Install IntelliJ IDEA
+
+- Download IntelliJ IDEA from the [official JetBrains website](https://www.jetbrains.com/idea/download/).
+- Follow the installation instructions for your OS.
+
+## Import Project into IntelliJ IDEA
+
+1. Open IntelliJ IDEA.
+2. Click on `File` -> `Open` and navigate to the root directory of your cloned project.
+3. Select the `pom.xml` file and click `Open` to import the project.
+
+## Configure Project SDK and Maven
+
+### Set up the JDK in IntelliJ IDEA:
+
+1. Go to `File` -> `Project Structure`.
+2. Under `Project Settings`, select `Project`.
+3. Set the `Project SDK` to the installed JDK.
+
+### Configure Maven in IntelliJ IDEA:
+
+1. Go to `File` -> `Settings` -> `Build, Execution, Deployment` -> `Build Tools` -> `Maven`.
+2. Set `Maven home directory` to the directory where Maven is installed.
+
+### Run the Project
+
+1. Find the main class (usually located in `src/main/java`).
+2. Right-click on the main class file and select `Run` or `Debug` to execute the project.
