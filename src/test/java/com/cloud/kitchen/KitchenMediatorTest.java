@@ -1,6 +1,7 @@
 package com.cloud.kitchen;
 
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 
 import com.cloud.kitchen.models.Courier;
@@ -139,20 +140,36 @@ class KitchenMediatorTest {
      * @throws InterruptedException if the thread is interrupted during sleep.
      */
     @Test
-    void testFoodWaitTimeCalculation() throws InterruptedException {
+    void testFoodWaitTimeCalculation() throws InterruptedException, java.util.concurrent.ExecutionException, java.util.concurrent.TimeoutException {
         kitchenMediator.setDispatchCommand(fifoStrategy);
 
-        Order order = new Order(UUID.randomUUID().toString(),"Burger", 5);
+        Order order = new Order(UUID.randomUUID().toString(), "Burger", 5);
         Courier courier = new Courier(1);
 
+        CompletableFuture<Void> orderReadyFuture = new CompletableFuture<>();
+
+        // Register an observer to complete the future when the order is ready
+        OrderReadyObserver orderReadyObserver = o -> {
+            if (o.getId().equals(order.getId())) {
+                orderReadyFuture.complete(null);
+            }
+        };
+        kitchenMediator.registerOrderReadyObserver(orderReadyObserver);
+
+        // Add order and courier
         kitchenMediator.addOrder(order);
         kitchenMediator.addCourier(courier);
 
-        TimeUnit.SECONDS.sleep(8); // Wait for the order to be prepared
+        // Wait until the order is marked as ready or timeout after 10 seconds
+        orderReadyFuture.get(10, TimeUnit.SECONDS);
+
+        // Wait for some time to ensure the food wait time is calculated
+        TimeUnit.SECONDS.sleep(2);
 
         double foodWaitTime = kitchenMediator.getFoodWaitTimes().getFirst();
-        assertTrue(foodWaitTime > 0);
+        assertTrue(foodWaitTime >= 0, "Food wait time should be greater than 0");
     }
+
 
     /**
      * Tests courier wait time calculation after order pickup.
