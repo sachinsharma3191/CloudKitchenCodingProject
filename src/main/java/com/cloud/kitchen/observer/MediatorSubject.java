@@ -1,7 +1,7 @@
 package com.cloud.kitchen.observer;
 
-import com.cloud.kitchen.models.Driver;
 import com.cloud.kitchen.models.Order;
+import com.cloud.kitchen.models.Courier;
 
 
 public interface MediatorSubject {
@@ -11,5 +11,5 @@ public interface MediatorSubject {
 
     void notifyOrderReadyObservers(Order order);
 
-    void notifyDriverArrivalObservers(Driver driver);
+    void notifyDriverArrivalObservers(Courier courier);
 }

@@ -1,23 +1,26 @@
 package com.cloud.kitchen.models;
 
 import java.util.Objects;
+import  java.time.LocalDateTime;
+
+import static com.cloud.kitchen.util.Utility.currentLocalDateTime;
 
 public class Order {
     private String id;
     private String name;
-    private long orderReceivedTime;
+    private LocalDateTime orderReceivedTime;
+    private LocalDateTime readyTime;
     private int prepTime;
-    private long readyTime;
 
     public Order() {
     }
 
-    public Order(String id, String name, int prepTime,long readyTime) {
+    public Order(String id, String name, int prepTime,LocalDateTime readyTime) {
         this.id = id;
         this.name = name;
         this.prepTime = prepTime;
         this.readyTime = readyTime;
-        this.orderReceivedTime = System.currentTimeMillis();
+        this.orderReceivedTime = currentLocalDateTime();
     }
 
     public String getId() {
@@ -44,11 +47,11 @@ public class Order {
         this.prepTime = prepTime;
     }
 
-    public long getReadyTime() {
+    public LocalDateTime getReadyTime() {
         return readyTime;
     }
 
-    public void setReadyTime(long readyTime) {
+    public void setReadyTime(LocalDateTime readyTime) {
         this.readyTime = readyTime;
     }
 
@@ -63,5 +66,16 @@ public class Order {
     @Override
     public int hashCode() {
         return Objects.hash(id, name, prepTime, readyTime);
+    }
+
+    @Override
+    public String toString() {
+        return "Order{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", orderReceivedTime=" + orderReceivedTime +
+                ", prepTime=" + prepTime +
+                ", readyTime=" + readyTime +
+                '}';
     }
 }

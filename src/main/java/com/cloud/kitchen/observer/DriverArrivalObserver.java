@@ -1,7 +1,7 @@
 package com.cloud.kitchen.observer;
 
-import com.cloud.kitchen.models.Driver;
+import com.cloud.kitchen.models.Courier;
 
 public interface DriverArrivalObserver {
-    void onDriverArrival(Driver driver);
+    void onDriverArrival(Courier courier);
 }
