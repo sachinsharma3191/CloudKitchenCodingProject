@@ -69,26 +69,50 @@ public class KitchenMediator implements MediatorSubject {
         this.dispatchCommand = dispatchCommand;
     }
 
+    /**
+     * Retrieves the queue of orders waiting to be processed.
+     *
+     * @return The queue of orders.
+     */
     public Queue<Order> getOrders() {
         return orders;
     }
 
+    /**
+     * Retrieves the queue of orders that are ready for pickup.
+     *
+     * @return The queue of ready orders.
+     */
     public Queue<Order> getReadyOrders() {
         return readyOrders;
     }
 
+    /**
+     * Retrieves the queue of couriers waiting for orders to be ready for pickup.
+     *
+     * @return The queue of waiting couriers.
+     */
     public Queue<Courier> getWaitingCouriers() {
         return waitingCouriers;
     }
 
+    /**
+     * Retrieves the list of recorded food wait times.
+     *
+     * @return The list of food wait times in minutes.
+     */
     public List<Double> getFoodWaitTimes() {
         return foodWaitTimes;
     }
 
+    /**
+     * Retrieves the list of recorded courier wait times.
+     *
+     * @return The list of courier wait times in minutes.
+     */
     public List<Double> getCourierWaitTimes() {
         return courierWaitTimes;
     }
-
 
     /**
      * Adds an order to the kitchen system for processing.
@@ -128,7 +152,6 @@ public class KitchenMediator implements MediatorSubject {
         dispatchOrder();
     }
 
-
     /**
      * Registers an observer for order readiness notifications.
      *
@@ -145,7 +168,7 @@ public class KitchenMediator implements MediatorSubject {
      * @param observer The observer object to be registered.
      */
     @Override
-    public void registerCourierArrivalObserver(com.cloud.kitchen.observer.CourierArrivalObserver observer) {
+    public void registerCourierArrivalObserver(CourierArrivalObserver observer) {
         courierArrivalObservers.add(observer);
     }
 
@@ -184,19 +207,17 @@ public class KitchenMediator implements MediatorSubject {
      */
     public void dispatchOrder(Order order, Courier courier) {
         double foodWaitTime = convertToMinutes(currentMilliSeconds() - order.getReadyTime());
-        double driverWaitTime = convertToMinutes(currentMilliSeconds() - courier.getArrivalTime());
+        double courierWaitTime = convertToMinutes(currentMilliSeconds() - courier.getArrivalTime());
 
         foodWaitTimes.add(foodWaitTime);
-        courierWaitTimes.add(driverWaitTime);
+        courierWaitTimes.add(courierWaitTime);
 
         logger.info("Courier {} is picking up order {}. Food wait time: {} minutes", courier.getCourierId(), order.getId(), decimalPrecision(foodWaitTime));
-        logger.info("Courier {} waited for {} minutes.", courier.getCourierId(), decimalPrecision(driverWaitTime));
-
+        logger.info("Courier {} waited for {} minutes.", courier.getCourierId(), decimalPrecision(courierWaitTime));
 
         // Remove order from ready list and courier from waiting list
         readyOrders.remove(order);
         waitingCouriers.remove(courier);
-
 
         // Notify observers of order completion
         notifyOrderReadyObservers(order);
@@ -209,6 +230,6 @@ public class KitchenMediator implements MediatorSubject {
     public void printAverages() {
         logger.info("Average statistics:");
         logger.info("Average food wait time: {} minutes", average(foodWaitTimes));
-        logger.info("Average Courier wait time: {} minutes ", average(courierWaitTimes));
+        logger.info("Average courier wait time: {} minutes", average(courierWaitTimes));
     }
 }

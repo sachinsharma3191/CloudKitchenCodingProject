@@ -20,8 +20,14 @@ public class Courier {
     public Courier(int courierId) {
         this.courierId = courierId;
         this.arrivalTime = currentMilliSeconds();
-}
+    }
 
+    /**
+     * Creates a new Courier object with the specified courier ID.
+     *
+     * @param courierId The unique identifier of the courier.
+     * @return A new Courier object with the specified ID.
+     */
     public static Courier createCourier(int courierId) {
         return new Courier(courierId);
     }
@@ -44,29 +50,47 @@ public class Courier {
         return arrivalTime;
     }
 
-
-
-
-    // Method to check if the driver matches a specific order
+    /**
+     * Checks if this Courier object matches a specific order.
+     * Currently, this method returns true for all orders.
+     *
+     * @param order The order object to check against.
+     * @return Always returns true.
+     */
     public boolean matchesOrder(Order order) {
+        // This method can be expanded to implement actual matching logic based on the order
         return true;
     }
 
-
+    /**
+     * Compares this Courier object to another object for equality.
+     *
+     * @param o The object to compare with.
+     * @return true if the objects are equal (same class and same values), false otherwise.
+     */
     @Override
     public boolean equals(Object o) {
-        if(this == o) return true;
-        if(o == null || getClass() != o.getClass()) return false;
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         Courier courier = (Courier) o;
         return courierId == courier.courierId && arrivalTime == courier.arrivalTime;
     }
 
+    /**
+     * Generates a hash code for this Courier object.
+     *
+     * @return The hash code based on the courierId and arrivalTime fields.
+     */
     @Override
     public int hashCode() {
         return Objects.hash(courierId, arrivalTime);
     }
 
-
+    /**
+     * Returns a string representation of the Courier object.
+     *
+     * @return A string representation containing courierId and arrivalTime.
+     */
     @Override
     public String toString() {
         return "Courier{" +
