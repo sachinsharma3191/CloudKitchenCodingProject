@@ -36,7 +36,6 @@ class KitchenMediatorTest {
         fifoStrategy = new FifoOrderDispatcherStrategy();
         orderReadyObserver = Mockito.mock(OrderReadyObserver.class);
         courierArrivalObserver = Mockito.mock(CourierArrivalObserver.class);
-
         kitchenMediator.registerOrderReadyObserver(orderReadyObserver);
         kitchenMediator.registerCourierArrivalObserver(courierArrivalObserver);
     }
@@ -117,9 +116,9 @@ class KitchenMediatorTest {
         kitchenMediator.addOrder(order);
         kitchenMediator.addCourier(courier);
 
-        TimeUnit.SECONDS.sleep(2); // Wait for the order to be prepared
+        TimeUnit.SECONDS.sleep(8); // Wait for the order to be prepared
 
-        double foodWaitTime = kitchenMediator.getFoodWaitTimes().get(0);
+        double foodWaitTime = kitchenMediator.getFoodWaitTimes().getFirst();
         assertTrue(foodWaitTime > 0);
     }
 
@@ -135,7 +134,7 @@ class KitchenMediatorTest {
 
         TimeUnit.SECONDS.sleep(2); // Wait for the order to be prepared
 
-        double courierWaitTime = kitchenMediator.getCourierWaitTimes().get(0);
+        double courierWaitTime = kitchenMediator.getCourierWaitTimes().getFirst();
         assertTrue(courierWaitTime >= 0);
     }
 

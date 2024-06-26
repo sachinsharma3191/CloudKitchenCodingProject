@@ -160,10 +160,9 @@ public class KitchenMediator implements MediatorSubject {
         waitingCouriers.remove(courier);
 
 
-        executorService.submit(() -> {
-            notifyOrderReadyObservers(order);
-            logger.info("Order picked up: {}", order);
-        });
+        // Notify observers of order completion
+        notifyOrderReadyObservers(order);
+        logger.info("Order picked up: {}", order);
     }
 
     /**
