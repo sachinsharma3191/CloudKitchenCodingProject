@@ -5,7 +5,17 @@ import com.cloud.kitchen.models.Order;
 import com.cloud.kitchen.mediator.KitchenMediator;
 import java.util.Queue;
 
+/**
+ * Implements the Matched dispatch strategy, where each courier is matched with a specific order.
+ */
 public class MatchedOrderDispatcherStrategy implements OrderDispatcherStrategy {
+    /**
+     * Dispatches orders to available couriers based on the FIFO strategy.
+     *
+     * @param mediator The kitchen mediator managing orders and couriers.
+     * @param readyOrders The queue of orders ready for pickup.
+     * @param waitingCouriers The queue of couriers waiting to pick up orders.
+     */
     @Override
     public void dispatchOrder(KitchenMediator mediator, Queue<Order> readyOrders, Queue<Courier> waitingCouriers) {
         /*

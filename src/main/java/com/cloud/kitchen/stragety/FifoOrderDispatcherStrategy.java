@@ -5,9 +5,19 @@ import com.cloud.kitchen.models.Order;
 import com.cloud.kitchen.mediator.KitchenMediator;
 import java.util.Queue;
 
-
+/**
+ * The FIFODispatchCommand class implements the OrderDispatcherStrategy interface
+ * for dispatching orders in a first-in-first-out manner.
+ */
 public class FifoOrderDispatcherStrategy implements OrderDispatcherStrategy {
 
+    /**
+     * Dispatches orders to available couriers based on the FIFO strategy.
+     *
+     * @param mediator The kitchen mediator managing orders and couriers.
+     * @param readyOrders The queue of orders ready for pickup.
+     * @param waitingCouriers The queue of couriers waiting to pick up orders.
+     */
     @Override
     public void dispatchOrder(KitchenMediator mediator, Queue<Order> readyOrders,Queue<Courier> waitingCouriers) {
          /*

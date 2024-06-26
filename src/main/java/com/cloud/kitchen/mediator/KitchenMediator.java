@@ -22,6 +22,12 @@ import static com.cloud.kitchen.util.Utility.convertToMinutes;
 import static com.cloud.kitchen.util.Utility.currentMilliSeconds;
 import static com.cloud.kitchen.util.Utility.decimalPrecision;
 
+/**
+ * The KitchenMediator class manages the interaction between orders, couriers,
+ * and dispatch strategies in a kitchen delivery system.
+ * It facilitates order preparation, courier dispatch, and order pickup,
+ * while also recording and reporting wait times.
+ */
 public class KitchenMediator implements MediatorSubject {
 
     private final static Logger logger = LogManager.getLogger(KitchenMediator.class);
@@ -37,6 +43,11 @@ public class KitchenMediator implements MediatorSubject {
     private final ExecutorService executorService;
     private OrderDispatcherStrategy dispatchCommand;
 
+    /**
+     * Constructs a KitchenMediator instance with queues for orders, ready orders,
+     * waiting couriers, and lists for food wait times, courier wait times,
+     * and observer registrations.
+     */
     public KitchenMediator() {
         this.orders = new ConcurrentLinkedQueue<>();
         this.readyOrders = new ConcurrentLinkedQueue<>();
@@ -49,6 +60,11 @@ public class KitchenMediator implements MediatorSubject {
         this.dispatchCommand = new FifoOrderDispatcherStrategy();
     }
 
+    /**
+     * Sets the dispatch strategy for order and courier dispatching.
+     *
+     * @param dispatchCommand The strategy to be used for dispatching orders.
+     */
     public void setDispatchCommand(OrderDispatcherStrategy dispatchCommand) {
         this.dispatchCommand = dispatchCommand;
     }
@@ -73,10 +89,11 @@ public class KitchenMediator implements MediatorSubject {
         return courierWaitTimes;
     }
 
+
     /**
-     * Add Order to Queue for Processing
+     * Adds an order to the kitchen system for processing.
      *
-     * @param order Object containing detail of Order
+     * @param order The order object containing order details.
      */
     public void addOrder(Order order) {
         orders.add(order);
@@ -85,9 +102,9 @@ public class KitchenMediator implements MediatorSubject {
     }
 
     /**
-     * Prepare Order
+     * Prepares an order for dispatching after its preparation time has elapsed.
      *
-     * @param order Object containing detail of Order
+     * @param order The order object that has been prepared.
      */
     private void prepareOrder(Order order) {
         executorService.submit(() -> {
@@ -100,9 +117,9 @@ public class KitchenMediator implements MediatorSubject {
     }
 
     /**
-     * Add Delivery Courier to Queue of Waiting Delivery Drives
+     * Adds a courier to the waiting list for order pickup.
      *
-     * @param courier Object containing detail of Courier
+     * @param courier The courier object containing courier details.
      */
     public void addCourier(Courier courier) {
         waitingCouriers.add(courier);
@@ -111,38 +128,59 @@ public class KitchenMediator implements MediatorSubject {
         dispatchOrder();
     }
 
+
+    /**
+     * Registers an observer for order readiness notifications.
+     *
+     * @param observer The observer object to be registered.
+     */
     @Override
     public void registerOrderReadyObserver(OrderReadyObserver observer) {
         orderReadyObservers.add(observer);
     }
 
+    /**
+     * Registers an observer for courier arrival notifications.
+     *
+     * @param observer The observer object to be registered.
+     */
     @Override
     public void registerCourierArrivalObserver(com.cloud.kitchen.observer.CourierArrivalObserver observer) {
         courierArrivalObservers.add(observer);
     }
 
+    /**
+     * Notifies all registered observers about the readiness of an order.
+     *
+     * @param order The order object that is ready for pickup.
+     */
     @Override
     public void notifyOrderReadyObservers(Order order) {
         orderReadyObservers.forEach(observer -> observer.onOrderReady(order));
     }
 
+    /**
+     * Notifies all registered observers about the arrival of a courier.
+     *
+     * @param courier The courier object that has arrived for order pickup.
+     */
     @Override
     public void notifyCourierArrivalObservers(Courier courier) {
         courierArrivalObservers.forEach(observer -> observer.updateCourierArrival(courier));
     }
 
     /**
-     * Dispatch Orders
+     * Dispatches orders according to the configured dispatch strategy.
      */
     public void dispatchOrder() {
         dispatchCommand.dispatchOrder(this, readyOrders, waitingCouriers);
     }
 
     /**
-     * Dispatch the Orders and Log the time
+     * Dispatches a specific order to a courier for pickup.
      *
-     * @param order Object containing detail of Order
-     * @param courier Object containing detail of Courier
+     * @param order   The order object to be picked up.
+     * @param courier The courier object assigned to pick up the order.
      */
     public void dispatchOrder(Order order, Courier courier) {
         double foodWaitTime = convertToMinutes(currentMilliSeconds() - order.getReadyTime());
@@ -166,7 +204,7 @@ public class KitchenMediator implements MediatorSubject {
     }
 
     /**
-     * Print the Logs for Delivery
+     * Prints average wait times for food preparation and courier pickup.
      */
     public void printAverages() {
         logger.info("Average statistics:");

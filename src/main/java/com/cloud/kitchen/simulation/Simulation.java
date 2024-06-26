@@ -15,6 +15,9 @@ import java.util.concurrent.TimeUnit;
 
 import static com.cloud.kitchen.util.Utility.currentMilliSeconds;
 
+/**
+ * Simulation class manages the simulation of order processing and courier arrivals in a kitchen delivery system.
+ */
 public class Simulation {
 
     private final static Logger logger = LogManager.getLogger(Simulation.class);
@@ -24,6 +27,11 @@ public class Simulation {
     private final ScheduledExecutorService orderExecutorService;
     private final ScheduledExecutorService courierExecutorService;
 
+    /**
+     * Constructor for Simulation class.
+     *
+     * @param kitchenMediator The mediator that manages orders and couriers in the simulation.
+     */
     public Simulation(KitchenMediator kitchenMediator) {
         this.orders = getOrders();
         this.kitchenMediator = kitchenMediator;
@@ -31,6 +39,11 @@ public class Simulation {
         courierExecutorService = getScheduledExecutorService();
     }
 
+    /**
+     * Retrieves the list of orders from JSON using a utility method.
+     *
+     * @return The list of orders read from JSON.
+     */
     private List<Order> getOrders() {
         List<Order> orders = JsonUtility.readOrders();
         if(CollectionUtils.isEmpty(orders)) {
@@ -42,20 +55,23 @@ public class Simulation {
     }
 
     /**
-     * Processing Orders
+     * Initiates the simulation by scheduling orders and courier arrivals.
      */
     public void processOrders() {
         simulateOrdersSubmission();
-        simulateDriverSubmission();
+        simulateCourierArrivals();
     }
 
     /**
-     * Simulating Courier added for Order Delivery
+     * Schedules periodic courier arrivals based on a fixed interval.
      */
-    private void simulateDriverSubmission() {
+    private void simulateCourierArrivals() {
         courierExecutorService.scheduleAtFixedRate(() -> kitchenMediator.addCourier(CourierFactory.createCourier()), 0, 4, TimeUnit.SECONDS); // Add a new driver every 4 seconds
     }
 
+    /**
+     * Schedules orders for submission to the kitchen mediator based on their preparation times.
+     */
     private void simulateOrdersSubmission() {
         for (Order order : orders) {
             orderExecutorService.schedule(() -> {
@@ -65,11 +81,18 @@ public class Simulation {
         }
     }
 
+    /**
+     * Creates a new scheduled executor service with a fixed thread pool size.
+     *
+     * @return A new scheduled executor service.
+     */
     private ScheduledExecutorService getScheduledExecutorService() {
         return Executors.newScheduledThreadPool(5);
     }
 
-
+    /**
+     * Shuts down the order and courier executor services to end the simulation.
+     */
     public void shutdown(){
         orderExecutorService.shutdownNow();
         courierExecutorService.shutdownNow();

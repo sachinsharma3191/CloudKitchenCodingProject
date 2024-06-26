@@ -2,8 +2,10 @@ package com.cloud.kitchen.models;
 
 import java.util.Objects;
 
-import static com.cloud.kitchen.util.Utility.currentMilliSeconds;
-
+/**
+ * The Courier class represents a delivery courier in the kitchen system.
+ * Each courier has an identifier and arrival time.
+ */
 public class Order {
     private String id;
     private String name;

@@ -4,34 +4,48 @@ import java.util.Objects;
 
 import static com.cloud.kitchen.util.Utility.currentMilliSeconds;
 
-public class   Courier {
+/**
+ * The Courier class represents a delivery courier in the kitchen system.
+ * Each courier has an identifier and arrival time.
+ */
+public class Courier {
     private final int courierId;
     private final long arrivalTime;
-    private final long dispatchTime;
 
-    private Order assignedOrder;
-
+    /**
+     * Constructs a Courier object with a specified courier ID.
+     *
+     * @param courierId The unique identifier of the courier.
+     */
     public Courier(int courierId) {
         this.courierId = courierId;
         this.arrivalTime = currentMilliSeconds();
-        this.dispatchTime = currentMilliSeconds();
-    }
+}
 
     public static Courier createCourier(int courierId) {
         return new Courier(courierId);
     }
 
+    /**
+     * Retrieves the unique identifier of the courier.
+     *
+     * @return The unique identifier of the courier.
+     */
     public int getCourierId() {
         return courierId;
     }
 
+    /**
+     * Retrieves the time when the courier arrived at the kitchen.
+     *
+     * @return The timestamp when the courier arrived, in milliseconds.
+     */
     public long getArrivalTime() {
         return arrivalTime;
     }
 
-    public long getDispatchTime() {
-        return dispatchTime;
-    }
+
+
 
     // Method to check if the driver matches a specific order
     public boolean matchesOrder(Order order) {
@@ -44,25 +58,20 @@ public class   Courier {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
         Courier courier = (Courier) o;
-        return courierId == courier.courierId && arrivalTime == courier.arrivalTime && dispatchTime == courier.dispatchTime;
+        return courierId == courier.courierId && arrivalTime == courier.arrivalTime;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(courierId, arrivalTime, dispatchTime);
+        return Objects.hash(courierId, arrivalTime);
     }
 
-
-    public void pickUpOrder(Order assignedOrder) {
-            System.out.println("Courier  " + courierId + " picked up order " + assignedOrder.getId());
-    }
 
     @Override
     public String toString() {
         return "Courier{" +
                 "courierId=" + courierId +
                 ", arrivalTime=" + arrivalTime +
-                ", dispatchTime=" + dispatchTime +
                 '}';
     }
 }

@@ -113,6 +113,7 @@ class KitchenMediatorTest {
         Order order = new Order(UUID.randomUUID().toString(),"Burger", 5);
         Courier courier = new Courier(1);
 
+
         kitchenMediator.addOrder(order);
         kitchenMediator.addCourier(courier);
 
