@@ -195,3 +195,54 @@ Modify dispatch strategies (FifoOrderDispatcherStrategy, MatchedOrderDispatcherS
 - [Visual Studio Code Java Documentation](https://code.visualstudio.com/docs/languages/java)
 - [Debugging in Visual Studio Code](https://code.visualstudio.com/docs/editor/debugging)
 
+
+## Running Java Project in Eclipse
+
+### Prerequisites
+1. **Java Development Kit (JDK)**:
+    - Ensure JDK is installed. You can download it from [Oracle's Java SE Downloads](https://www.oracle.com/java/technologies/javase-downloads.html) or [OpenJDK](https://adoptopenjdk.net/).
+
+2. **Eclipse IDE**:
+    - Download and install Eclipse IDE for Java Developers from [here](https://www.eclipse.org/downloads/packages/).
+
+### Setting Up the Project
+
+1. **Open Eclipse**:
+    - Launch Eclipse IDE.
+
+2. **Import Project**:
+    - If you have an existing project:
+        - Click on **File -> Import -> General -> Existing Projects into Workspace**.
+        - Select your project directory and click **Finish**.
+    - If you are creating a new project:
+        - Click on **File -> New -> Java Project**.
+        - Enter a project name and click **Finish**.
+
+3. **Configure JDK in Eclipse**:
+    - Go to **Window -> Preferences -> Java -> Installed JREs**.
+    - Add or select the JDK installed on your system.
+
+### Running the Project
+
+1. **Run the Main Class**:
+    - In the Project Explorer, navigate to your main class (usually located in the `src` folder).
+    - Right-click on the main class and select **Run As -> Java Application**.
+
+2. **View Output**:
+    - The output will be displayed in the Console view at the bottom of Eclipse.
+
+### Debugging the Project
+
+1. **Set Breakpoints**:
+    - Click in the margin next to a line of code to set a breakpoint.
+
+2. **Debug Java Application**:
+    - Open the Java file with breakpoints set.
+    - Right-click in the editor and choose **Debug As -> Java Application**.
+    - Use the debug controls (`F8` for step over, `F5` for step into, etc.).
+
+### Additional Resources
+
+- [Eclipse Documentation](https://www.eclipse.org/documentation/)
+- [Debugging in Eclipse](https://help.eclipse.org/latest/topic/org.eclipse.jdt.doc.user/reference/views/debug/ref-debug_view.htm)
+
