@@ -57,7 +57,7 @@ To run the project, follow these steps:
 1. **Clone the repository:**
 
    ```bash
-   cd kitchen-delivery-system
+   cd CloudKitchenCodingProject
 
 2. **Build the project:**
 
