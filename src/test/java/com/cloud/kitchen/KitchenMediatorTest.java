@@ -1,9 +1,8 @@
 package com.cloud.kitchen;
 
 import com.cloud.kitchen.mediator.KitchenMediator;
-import com.cloud.kitchen.models.Order;
 import com.cloud.kitchen.models.Courier;
-import com.cloud.kitchen.observer.DriverArrivalObserver;
+import com.cloud.kitchen.models.Order;
 import com.cloud.kitchen.observer.OrderReadyObserver;
 import com.cloud.kitchen.stragety.MatchedOrderDispatcherStrategy;
 import org.junit.jupiter.api.AfterEach;
@@ -15,7 +14,6 @@ import org.mockito.MockitoAnnotations;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -38,8 +36,8 @@ public class KitchenMediatorTest {
         MockitoAnnotations.openMocks(this);
         mediator.setDispatchCommand(new MatchedOrderDispatcherStrategy());
         testScheduler = Executors.newSingleThreadScheduledExecutor();
-        this.order = new Order("1", "Burger", 5, LocalDateTime.now());
-        this.courier = Courier.createDriver(23);
+        this.order = new Order("1", "Burger", 5,System.currentTimeMillis());
+        this.courier = Courier.createCourier(23);
     }
 
     @AfterEach
@@ -58,18 +56,18 @@ public class KitchenMediatorTest {
 
     @Test
     void testAddDriver() {
-        mediator.addDriver(courier);
+        mediator.addCourier(courier);
 
         // Verify that the courier was added to the mediator
-        assertEquals(1, mediator.getWaitingDrivers().size());
-        assertEquals(courier, mediator.getWaitingDrivers().peek());
+        assertEquals(1, mediator.getWaitingCouriers().size());
+        assertEquals(courier, mediator.getWaitingCouriers().peek());
     }
 
     @Test
     void testDispatchOrder() throws InterruptedException {
         // Prepare mock objects
         mediator.addOrder(order);
-        mediator.addDriver(courier);
+        mediator.addCourier(courier);
 
         // Wait for the scheduled task to complete
         testScheduler.schedule(() ->
@@ -79,7 +77,7 @@ public class KitchenMediatorTest {
 
         // Verify that the order was dispatched correctly
         assertEquals(0, mediator.getReadyOrders().size());
-        assertEquals(1, mediator.getWaitingDrivers().size());
+        assertEquals(1, mediator.getWaitingCouriers().size());
     }
 
     @Test
@@ -91,7 +89,7 @@ public class KitchenMediatorTest {
 
         // Fast forward the timer to simulate order preparation completion
         testScheduler.schedule(() -> {
-            order.setReadyTime(LocalDateTime.now());
+            order.setReadyTime(System.currentTimeMillis());
             mediator.getReadyOrders().add(order);
             mediator.notifyOrderReadyObservers(order);
         }, 1, TimeUnit.SECONDS);
@@ -103,13 +101,13 @@ public class KitchenMediatorTest {
 
     @Test
     void testRegisterDriverArrivalObserver() {
-        DriverArrivalObserver observer = mock(DriverArrivalObserver.class);
-        mediator.registerDriverArrivalObserver(observer);
+        com.cloud.kitchen.observer.CourierArrivalObserver observer = mock(com.cloud.kitchen.observer.CourierArrivalObserver.class);
+        mediator.registerCourierArrivalObserver(observer);
 
-        mediator.addDriver(courier);
+        mediator.addCourier(courier);
 
         // Verify that the observer's onDriverArrival method was called
-        verify(observer, times(1)).onDriverArrival(courier);
+        verify(observer, times(1)).updateCourierArrival(courier);
     }
 
     @Test
@@ -125,12 +123,12 @@ public class KitchenMediatorTest {
 
     @Test
     void testNotifyDriverArrivalObservers() {
-        DriverArrivalObserver observer = mock(DriverArrivalObserver.class);
-        mediator.registerDriverArrivalObserver(observer);
+        com.cloud.kitchen.observer.CourierArrivalObserver observer = mock(com.cloud.kitchen.observer.CourierArrivalObserver.class);
+        mediator.registerCourierArrivalObserver(observer);
 
         mediator.notifyDriverArrivalObservers(courier);
 
         // Verify that the observer's onDriverArrival method was called
-        verify(observer, times(1)).onDriverArrival(courier);
+        verify(observer, times(1)).updateCourierArrival(courier);
     }
 }

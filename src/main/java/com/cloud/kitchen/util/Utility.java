@@ -1,16 +1,14 @@
 package com.cloud.kitchen.util;
 
-import java.util.List;
 import java.text.DecimalFormat;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 import static com.cloud.kitchen.constants.StringConstants.DECIMAL_PRECISION;
 
 public class Utility {
 
-    public static double convertToMinutes(LocalDateTime fromDate,LocalDateTime toDate){
-        return ChronoUnit.MINUTES.between(fromDate, toDate);
+    public static double convertToMinutes(long value) {
+        return (double) value / 60000;
     }
 
     public static double averageOfList(List<Double> list){
@@ -30,7 +28,7 @@ public class Utility {
         return df.format(value);
     }
 
-    public static LocalDateTime currentLocalDateTime(){
-        return LocalDateTime.now();
+    public static long currentMilliSeconds() {
+        return System.currentTimeMillis();
     }
 }

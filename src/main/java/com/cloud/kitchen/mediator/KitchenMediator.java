@@ -1,8 +1,7 @@
 package com.cloud.kitchen.mediator;
 
-import com.cloud.kitchen.models.Order;
 import com.cloud.kitchen.models.Courier;
-import com.cloud.kitchen.observer.DriverArrivalObserver;
+import com.cloud.kitchen.models.Order;
 import com.cloud.kitchen.observer.MediatorSubject;
 import com.cloud.kitchen.observer.OrderReadyObserver;
 import com.cloud.kitchen.stragety.OrderDispatcherStrategy;
@@ -18,7 +17,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import static com.cloud.kitchen.util.Utility.average;
 import static com.cloud.kitchen.util.Utility.convertToMinutes;
-import static com.cloud.kitchen.util.Utility.currentLocalDateTime;
+import static com.cloud.kitchen.util.Utility.currentMilliSeconds;
 import static com.cloud.kitchen.util.Utility.decimalPrecision;
 
 public class KitchenMediator implements MediatorSubject {
@@ -29,21 +28,19 @@ public class KitchenMediator implements MediatorSubject {
     private final Queue<Order> readyOrders;
     private final Queue<Courier> waitingCouriers;
     private final List<Double> foodWaitTimes;
-    private final List<Double> driverWaitTimes;
+    private final List<Double> courierWaitTimes;
     private final List<OrderReadyObserver> orderReadyObservers;
-    private final List<DriverArrivalObserver> driverArrivalObservers;
+    private final List<com.cloud.kitchen.observer.CourierArrivalObserver> courierArrivalObservers;
     private OrderDispatcherStrategy dispatchCommand;
 
     public KitchenMediator() {
-
         this.orders = new ConcurrentLinkedQueue<>();
         this.readyOrders = new ConcurrentLinkedQueue<>();
         this.waitingCouriers = new ConcurrentLinkedQueue<>();
         this.foodWaitTimes = new CopyOnWriteArrayList<>();
-        this.driverWaitTimes = new CopyOnWriteArrayList<>();
+        this.courierWaitTimes = new CopyOnWriteArrayList<>();
         this.orderReadyObservers = new CopyOnWriteArrayList<>();
-        this.driverArrivalObservers = new CopyOnWriteArrayList<>();
-        // Default to FIFO strategy
+        this.courierArrivalObservers = new CopyOnWriteArrayList<>();
     }
 
     public void setDispatchCommand(OrderDispatcherStrategy dispatchCommand) {
@@ -58,7 +55,7 @@ public class KitchenMediator implements MediatorSubject {
         return readyOrders;
     }
 
-    public Queue<Courier> getWaitingDrivers() {
+    public Queue<Courier> getWaitingCouriers() {
         return waitingCouriers;
     }
 
@@ -66,8 +63,8 @@ public class KitchenMediator implements MediatorSubject {
         return foodWaitTimes;
     }
 
-    public List<Double> getDriverWaitTimes() {
-        return driverWaitTimes;
+    public List<Double> getCourierWaitTimes() {
+        return courierWaitTimes;
     }
 
     /**
@@ -91,7 +88,7 @@ public class KitchenMediator implements MediatorSubject {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                order.setReadyTime(currentLocalDateTime());
+                order.setReadyTime(currentMilliSeconds());
                 readyOrders.add(order);
                 logger.info("Order prepared: {}", order);
                 notifyOrderReadyObservers(order);
@@ -105,10 +102,10 @@ public class KitchenMediator implements MediatorSubject {
      *
      * @param courier Object containing detail of Courier
      */
-    public void addDriver(Courier courier) {
+    public void addCourier(Courier courier) {
         waitingCouriers.add(courier);
         logger.info("Courier dispatched: {}", courier);
-        notifyDriverArrivalObservers(courier);
+        notifyCourierArrivalObservers(courier);
         dispatchOrder();
     }
 
@@ -118,8 +115,8 @@ public class KitchenMediator implements MediatorSubject {
     }
 
     @Override
-    public void registerDriverArrivalObserver(DriverArrivalObserver observer) {
-        driverArrivalObservers.add(observer);
+    public void registerCourierArrivalObserver(com.cloud.kitchen.observer.CourierArrivalObserver observer) {
+        courierArrivalObservers.add(observer);
     }
 
     @Override
@@ -128,21 +125,15 @@ public class KitchenMediator implements MediatorSubject {
     }
 
     @Override
-    public void notifyDriverArrivalObservers(Courier courier) {
-        driverArrivalObservers.forEach(observer -> observer.onDriverArrival(courier));
+    public void notifyCourierArrivalObservers(Courier courier) {
+        courierArrivalObservers.forEach(observer -> observer.updateCourierArrival(courier));
     }
 
     /**
      * Dispatch Orders
      */
     public void dispatchOrder() {
-        while (!readyOrders.isEmpty() && !waitingCouriers.isEmpty()) {
-            Order order = readyOrders.poll();
-            Courier courier = waitingCouriers.poll();
-            if(order != null && courier != null) {
-                dispatchOrder(order, courier);
-            }
-        }
+        dispatchCommand.dispatchOrder( this,readyOrders, waitingCouriers);
     }
 
     /**
@@ -152,14 +143,19 @@ public class KitchenMediator implements MediatorSubject {
      * @param courier Object containing detail of Courier
      */
     public void dispatchOrder(Order order, Courier courier) {
-        double foodWaitTime = convertToMinutes(order.getReadyTime(), currentLocalDateTime());
-        double driverWaitTime = convertToMinutes(courier.getArrivalTime(),currentLocalDateTime());
+        double foodWaitTime = convertToMinutes(currentMilliSeconds() - order.getReadyTime());
+        double driverWaitTime = convertToMinutes(currentMilliSeconds() - courier.getArrivalTime());
 
         foodWaitTimes.add(foodWaitTime);
-        driverWaitTimes.add(driverWaitTime);
+        courierWaitTimes.add(driverWaitTime);
 
-        logger.info("Courier {} is picking up order {}. Food wait time: {} minutes", courier.getDriverId(), order.getId(), decimalPrecision(foodWaitTime));
-        logger.info("Courier {} waited for {} minutes.", courier.getDriverId(), decimalPrecision(driverWaitTime));
+        logger.info("Courier {} is picking up order {}. Food wait time: {} minutes", courier.getCourierId(), order.getId(), decimalPrecision(foodWaitTime));
+        logger.info("Courier {} waited for {} minutes.", courier.getCourierId(), decimalPrecision(driverWaitTime));
+
+
+        // Remove order from ready list and courier from waiting list
+        readyOrders.remove(order);
+        waitingCouriers.remove(courier);
 
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
@@ -169,10 +165,7 @@ public class KitchenMediator implements MediatorSubject {
                 notifyOrderReadyObservers(order);
                 logger.info("Order picked up: {}", order);
             }
-        }, 1000);
-        // Remove order from ready list and courier from waiting list
-        readyOrders.remove(order);
-        waitingCouriers.remove(courier);
+        }, 1);
     }
 
     /**
@@ -181,6 +174,6 @@ public class KitchenMediator implements MediatorSubject {
     public void printAverages() {
         logger.info("Average statistics:");
         logger.info("Average food wait time: {} minutes", average(foodWaitTimes));
-        logger.info("Average Courier wait time: {} minutes ", average(driverWaitTimes));
+        logger.info("Average Courier wait time: {} minutes ", average(courierWaitTimes));
     }
 }

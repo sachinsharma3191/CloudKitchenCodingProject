@@ -2,18 +2,16 @@ package com.cloud.kitchen;
 
 import com.cloud.kitchen.mediator.KitchenMediator;
 import com.cloud.kitchen.observer.OrderReadyObserver;
-import com.cloud.kitchen.observer.DriverArrivalObserver;
+import com.cloud.kitchen.observer.CourierArrivalObserver;
+import com.cloud.kitchen.simulation.Simulation;
+
+import com.cloud.kitchen.stragety.MatchedOrderDispatcherStrategy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import  com.cloud.kitchen.stragety.FifoOrderDispatcherStrategy;
-
-
 import static com.cloud.kitchen.util.Utility.convertToMinutes;
-import static com.cloud.kitchen.util.Utility.currentLocalDateTime;
+import static com.cloud.kitchen.util.Utility.currentMilliSeconds;
 import static com.cloud.kitchen.util.Utility.decimalPrecision;
-
-import com.cloud.kitchen.simulation.Simulation;
 
 public class Main {
 
@@ -27,28 +25,38 @@ public class Main {
 
         // Register observers for order readiness and driver arrival
         OrderReadyObserver orderReadyObserver = order -> {
-            double foodWaitTime = convertToMinutes(order.getReadyTime(), currentLocalDateTime());
+            double foodWaitTime = convertToMinutes(currentMilliSeconds() - order.getReadyTime());
             kitchenMediator.getFoodWaitTimes().add(foodWaitTime);
             logger.info("Order {} is ready.Food wait time: {} minutes", order.getId(), decimalPrecision(foodWaitTime));
         };
 
-        DriverArrivalObserver driverArrivalObserver = driver -> {
-            double driverWaitTime = convertToMinutes(driver.getArrivalTime(), currentLocalDateTime());
-            kitchenMediator.getDriverWaitTimes().add(driverWaitTime);
-            logger.info("Courier {} has arrived.Courier wait time: {} minutes.", driver.getDriverId(), decimalPrecision(driverWaitTime));
+        CourierArrivalObserver courierArrivalObserver = courier -> {
+            double driverWaitTime = convertToMinutes(currentMilliSeconds() - courier.getArrivalTime());
+            kitchenMediator.getCourierWaitTimes().add(driverWaitTime);
+            logger.info("Courier {} has arrived.Courier wait time: {} minutes.", courier.getCourierId(), decimalPrecision(driverWaitTime));
         };
 
         kitchenMediator.registerOrderReadyObserver(orderReadyObserver);
-        kitchenMediator.registerDriverArrivalObserver(driverArrivalObserver);
+        kitchenMediator.registerCourierArrivalObserver(courierArrivalObserver);
 
         return kitchenMediator;
     }
 
     public static void main(String[] args) {
         KitchenMediator kitchenMediator = getKitchenMediator();
-        kitchenMediator.setDispatchCommand(new FifoOrderDispatcherStrategy());
+        kitchenMediator.setDispatchCommand(new MatchedOrderDispatcherStrategy());
 
         Simulation simulation = new Simulation(kitchenMediator);
+        simulation.processOrders();
+
+        try {
+            Thread.sleep(60000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        simulation.shutdown();
+
+        kitchenMediator.printAverages();
     }
 
 }

@@ -1,5 +1,6 @@
 package com.cloud.kitchen.simulation;
 
+import com.cloud.kitchen.factory.CourierFactory;
 import com.cloud.kitchen.mediator.KitchenMediator;
 import com.cloud.kitchen.models.Order;
 import com.cloud.kitchen.util.JsonUtility;
@@ -12,10 +13,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import com.cloud.kitchen.factory.CourierFactory;
-
-
-import static com.cloud.kitchen.util.Utility.currentLocalDateTime;
+import static com.cloud.kitchen.util.Utility.currentMilliSeconds;
 
 public class Simulation {
 
@@ -25,7 +23,6 @@ public class Simulation {
     private final KitchenMediator kitchenMediator;
     private final ScheduledExecutorService orderExecutorService;
     private final ScheduledExecutorService courierExecutorService;
-
 
     public Simulation(KitchenMediator kitchenMediator) {
         this.orders = getOrders();
@@ -47,7 +44,7 @@ public class Simulation {
     /**
      * Processing Orders
      */
-    private void processOrders() {
+    public void processOrders() {
         simulateOrdersSubmission();
         simulateDriverSubmission();
     }
@@ -56,21 +53,22 @@ public class Simulation {
      * Simulating Courier added for Order Delivery
      */
     private void simulateDriverSubmission() {
-        courierExecutorService.scheduleAtFixedRate(() -> kitchenMediator.addDriver(CourierFactory.createCourier()), 0, 4, TimeUnit.SECONDS); // Add a new driver every 4 seconds
+        courierExecutorService.scheduleAtFixedRate(() -> kitchenMediator.addCourier(CourierFactory.createCourier()), 0, 4, TimeUnit.SECONDS); // Add a new driver every 4 seconds
     }
 
     private void simulateOrdersSubmission() {
         for (Order order : orders) {
             orderExecutorService.schedule(() -> {
-                order.setReadyTime(currentLocalDateTime());
+                order.setReadyTime(currentMilliSeconds());
                 kitchenMediator.addOrder(order);
             }, order.getPrepTime(), TimeUnit.SECONDS);
         }
     }
 
-    public ScheduledExecutorService getScheduledExecutorService() {
+    private ScheduledExecutorService getScheduledExecutorService() {
         return Executors.newScheduledThreadPool(5);
     }
+
 
     public void shutdown(){
         orderExecutorService.shutdownNow();

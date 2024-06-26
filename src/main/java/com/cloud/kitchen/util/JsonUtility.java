@@ -15,6 +15,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.cloud.kitchen.constants.StringConstants.ORDERS_FILE;
+
 public class JsonUtility {
 
     private final static Logger logger = LogManager.getLogger(JsonUtility.class);
@@ -31,7 +33,7 @@ public class JsonUtility {
     public static List<Order> readOrders() {
         List<Order> orders = new ArrayList<>();
         try {
-            InputStream inputStream = JsonUtility.class.getClassLoader().getResourceAsStream(com.cloud.kitchen.constants.StringConstants.ORDERS_FILE);
+            InputStream inputStream = JsonUtility.class.getClassLoader().getResourceAsStream(ORDERS_FILE);
             if(inputStream == null) {
                 logger.error("File not found!");
                 return orders;

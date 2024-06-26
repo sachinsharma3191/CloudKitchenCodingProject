@@ -6,10 +6,7 @@ import com.cloud.kitchen.models.Courier;
 
 public interface MediatorSubject {
     void registerOrderReadyObserver(OrderReadyObserver observer);
-
-    void registerDriverArrivalObserver(DriverArrivalObserver observer);
-
+    void registerCourierArrivalObserver(CourierArrivalObserver observer);
     void notifyOrderReadyObservers(Order order);
-
-    void notifyDriverArrivalObservers(Courier courier);
+    void notifyCourierArrivalObservers(Courier courier);
 }

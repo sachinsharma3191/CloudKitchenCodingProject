@@ -1,26 +1,23 @@
 package com.cloud.kitchen.models;
 
 import java.util.Objects;
-import  java.time.LocalDateTime;
 
-import static com.cloud.kitchen.util.Utility.currentLocalDateTime;
+import static com.cloud.kitchen.util.Utility.currentMilliSeconds;
 
 public class Order {
     private String id;
     private String name;
-    private LocalDateTime orderReceivedTime;
-    private LocalDateTime readyTime;
     private int prepTime;
+    private long readyTime;
 
     public Order() {
     }
 
-    public Order(String id, String name, int prepTime,LocalDateTime readyTime) {
+    public Order(String id, String name, int prepTime, long readyTime) {
         this.id = id;
         this.name = name;
         this.prepTime = prepTime;
         this.readyTime = readyTime;
-        this.orderReceivedTime = currentLocalDateTime();
     }
 
     public String getId() {
@@ -47,11 +44,13 @@ public class Order {
         this.prepTime = prepTime;
     }
 
-    public LocalDateTime getReadyTime() {
+
+
+    public long getReadyTime() {
         return readyTime;
     }
 
-    public void setReadyTime(LocalDateTime readyTime) {
+    public void setReadyTime(long readyTime) {
         this.readyTime = readyTime;
     }
 
@@ -60,12 +59,12 @@ public class Order {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
         Order order = (Order) o;
-        return prepTime == order.prepTime && readyTime == order.readyTime && Objects.equals(id, order.id) && Objects.equals(name, order.name);
+        return  readyTime == order.readyTime && prepTime == order.prepTime && Objects.equals(id, order.id) && Objects.equals(name, order.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, prepTime, readyTime);
+        return Objects.hash(id, name,readyTime, prepTime);
     }
 
     @Override
@@ -73,7 +72,6 @@ public class Order {
         return "Order{" +
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
-                ", orderReceivedTime=" + orderReceivedTime +
                 ", prepTime=" + prepTime +
                 ", readyTime=" + readyTime +
                 '}';
