@@ -21,25 +21,33 @@ import static org.mockito.Mockito.*;
 
 import com.cloud.kitchen.mediator.KitchenMediator;
 
+/**
+ * The KitchenMediatorTest class contains unit tests for the KitchenMediator class and its functionalities.
+ * It tests order processing, courier dispatch strategies, observer notifications, and average calculations.
+ */
 class KitchenMediatorTest {
 
     private KitchenMediator kitchenMediator;
     private OrderDispatcherStrategy matchedStrategy;
     private OrderDispatcherStrategy fifoStrategy;
     private OrderReadyObserver orderReadyObserver;
-    private CourierArrivalObserver courierArrivalObserver;
 
+    /**
+     * Initializes the test environment before each test method runs.
+     */
     @BeforeEach
     void setUp() {
         kitchenMediator = new KitchenMediator();
         matchedStrategy = new MatchedOrderDispatcherStrategy();
         fifoStrategy = new FifoOrderDispatcherStrategy();
         orderReadyObserver = Mockito.mock(OrderReadyObserver.class);
-        courierArrivalObserver = Mockito.mock(CourierArrivalObserver.class);
         kitchenMediator.registerOrderReadyObserver(orderReadyObserver);
-        kitchenMediator.registerCourierArrivalObserver(courierArrivalObserver);
+        kitchenMediator.registerCourierArrivalObserver(Mockito.mock(CourierArrivalObserver.class));
     }
 
+    /**
+     * Tests the addition of an order to the kitchen mediator.
+     */
     @Test
     void testAddOrder() {
         Order order = new Order(UUID.randomUUID().toString(),"Burger", 5);
@@ -49,6 +57,11 @@ class KitchenMediatorTest {
         assertTrue(kitchenMediator.getOrders().contains(order));
     }
 
+    /**
+     * Tests the preparation of an order and the notification of observers when it's ready.
+     *
+     * @throws InterruptedException if the thread is interrupted during sleep.
+     */
     @Test
     void testPrepareOrder() throws InterruptedException {
         Order order = new Order(UUID.randomUUID().toString(),"Burger", 4);
@@ -61,6 +74,9 @@ class KitchenMediatorTest {
         verify(orderReadyObserver, atLeastOnce()).onOrderReady(order);
     }
 
+    /**
+     * Tests the addition of a courier to the kitchen mediator.
+     */
     @Test
     void testAddCourier() {
         Courier courier = new Courier(1);
@@ -70,6 +86,11 @@ class KitchenMediatorTest {
         assertTrue(kitchenMediator.getWaitingCouriers().contains(courier));
     }
 
+    /**
+     * Tests order dispatch using the Matched Order Dispatcher Strategy.
+     *
+     * @throws InterruptedException if the thread is interrupted during sleep.
+     */
     @Test
     void testDispatchOrderMatchedStrategy() throws InterruptedException {
         kitchenMediator.setDispatchCommand(matchedStrategy);
@@ -86,6 +107,11 @@ class KitchenMediatorTest {
         assertTrue(kitchenMediator.getWaitingCouriers().isEmpty());
     }
 
+    /**
+     * Tests order dispatch using the FIFO Order Dispatcher Strategy.
+     *
+     * @throws InterruptedException if the thread is interrupted during sleep.
+     */
     @Test
     void testDispatchOrderFIFOStrategy() throws InterruptedException {
         kitchenMediator.setDispatchCommand(fifoStrategy);
@@ -106,13 +132,17 @@ class KitchenMediatorTest {
         assertTrue(kitchenMediator.getWaitingCouriers().isEmpty());
     }
 
+    /**
+     * Tests food wait time calculation after order pickup.
+     *
+     * @throws InterruptedException if the thread is interrupted during sleep.
+     */
     @Test
     void testFoodWaitTimeCalculation() throws InterruptedException {
         kitchenMediator.setDispatchCommand(fifoStrategy);
 
         Order order = new Order(UUID.randomUUID().toString(),"Burger", 5);
         Courier courier = new Courier(1);
-
 
         kitchenMediator.addOrder(order);
         kitchenMediator.addCourier(courier);
@@ -123,6 +153,11 @@ class KitchenMediatorTest {
         assertTrue(foodWaitTime > 0);
     }
 
+    /**
+     * Tests courier wait time calculation after order pickup.
+     *
+     * @throws InterruptedException if the thread is interrupted during sleep.
+     */
     @Test
     void testCourierWaitTimeCalculation() throws InterruptedException {
         kitchenMediator.setDispatchCommand(fifoStrategy);
@@ -139,6 +174,9 @@ class KitchenMediatorTest {
         assertTrue(courierWaitTime >= 0);
     }
 
+    /**
+     * Tests printing of average statistics for food and courier wait times.
+     */
     @Test
     void testPrintAverages() {
         kitchenMediator.setDispatchCommand(fifoStrategy);
