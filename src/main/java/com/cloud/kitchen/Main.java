@@ -43,15 +43,16 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        KitchenMediator kitchenMediator = getKitchenMediator();
-
-        Simulation simulation = new Simulation(kitchenMediator);
         // Run for FIFO Strategy
-        runSimulation(simulation, kitchenMediator);
+        KitchenMediator kitchenMediator1 = getKitchenMediator();
+        Simulation simulation1 = new Simulation(kitchenMediator1);
+        runSimulation(simulation1, kitchenMediator1);
 
         // Run for  Matched Strategy
-        kitchenMediator.setDispatchCommand(new MatchedOrderDispatcherStrategy());
-        runSimulation(simulation,kitchenMediator);
+        KitchenMediator kitchenMediator2 = getKitchenMediator();
+        Simulation simulation2 = new Simulation(kitchenMediator2);
+        kitchenMediator2.setDispatchCommand(new MatchedOrderDispatcherStrategy());
+        runSimulation(simulation2,kitchenMediator2);
     }
 
     private static void runSimulation(Simulation simulation, KitchenMediator kitchenMediator) {
