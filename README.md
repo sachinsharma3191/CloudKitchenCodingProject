@@ -88,37 +88,110 @@ If any errors occur during setup or execution, check Maven dependencies and ensu
 Modify dispatch strategies (FifoOrderDispatcherStrategy, MatchedOrderDispatcherStrategy) or add new strategies in com.cloud.kitchen.stragety package as per your requirements.
 
 
-# Intellij Set up and Execution
+## Running Java Project in IntelliJ IDEA
 
 ### Prerequisites
-- Java Development Kit (JDK): Version 8 or above. You can download it from Oracle's JDK website or use OpenJDK
-- Maven build tool installed
+1. **Java Development Kit (JDK)**:
+    - Ensure JDK is installed. You can download it from [Oracle's Java SE Downloads](https://www.oracle.com/java/technologies/javase-downloads.html) or [OpenJDK](https://adoptopenjdk.net/).
 
-## Download and Install IntelliJ IDEA
+2. **IntelliJ IDEA**:
+    - Download and install IntelliJ IDEA from [here](https://www.jetbrains.com/idea/).
 
-- Download IntelliJ IDEA from the [official JetBrains website](https://www.jetbrains.com/idea/download/).
-- Follow the installation instructions for your OS.
+### Setting Up the Project
 
-## Import Project into IntelliJ IDEA
+1. **Open Project**:
+    - Launch IntelliJ IDEA.
+    - Click on **File -> Open** and navigate to your Java project directory.
 
-1. Open IntelliJ IDEA.
-2. Click on `File` -> `Open` and navigate to the root directory of your cloned project.
-3. Select the `pom.xml` file and click `Open` to import the project.
+2. **Import Project from Existing Sources**:
+    - Select the `pom.xml` file (Maven projects) or the root directory containing your Java project.
+    - Click **Open** to import the project.
 
-## Configure Project SDK and Maven
+3. **Configure JDK in IntelliJ IDEA**:
+    - Go to **File -> Project Structure**.
+    - Under **Project Settings**, select **Project**.
+    - Set the **Project SDK** to the installed JDK.
 
-### Set up the JDK in IntelliJ IDEA:
+4. **Configure Maven in IntelliJ IDEA** (for Maven projects):
+    - Go to **File -> Settings -> Build, Execution, Deployment -> Build Tools -> Maven**.
+    - Set **Maven home directory** to the directory where Maven is installed.
 
-1. Go to `File` -> `Project Structure`.
-2. Under `Project Settings`, select `Project`.
-3. Set the `Project SDK` to the installed JDK.
+### Running the Project
 
-### Configure Maven in IntelliJ IDEA:
+1. **Run the Main Class**:
+    - In the Project tool window, navigate to your main class (usually located in `src/main/java`).
+    - Right-click on the main class and select **Run** or **Debug**.
 
-1. Go to `File` -> `Settings` -> `Build, Execution, Deployment` -> `Build Tools` -> `Maven`.
-2. Set `Maven home directory` to the directory where Maven is installed.
+2. **View Output**:
+    - The output will be displayed in the Run tool window at the bottom of IntelliJ IDEA.
 
-### Run the Project
+### Debugging the Project
 
-1. Find the main class (usually located in `src/main/java`).
-2. Right-click on the main class file and select `Run` or `Debug` to execute the project.
+1. **Set Breakpoints**:
+    - Click in the gutter next to a line of code to set a breakpoint.
+
+2. **Debug Java Application**:
+    - Open the Java file with breakpoints set.
+    - Right-click in the editor and choose **Debug**.
+    - Use the debug controls (`F8` for step over, `F7` for step into, etc.).
+
+### Additional Resources
+
+- [IntelliJ IDEA Documentation](https://www.jetbrains.com/idea/documentation/)
+- [Debugging in IntelliJ IDEA](https://www.jetbrains.com/idea/features/debugging.html)
+
+
+
+## Running Java Project in Visual Studio Code
+
+### Prerequisites
+1. **Java Development Kit (JDK)**:
+    - Ensure JDK is installed. You can download it from [Oracle's Java SE Downloads](https://www.oracle.com/java/technologies/javase-downloads.html) or [OpenJDK](https://adoptopenjdk.net/).
+
+2. **Visual Studio Code**:
+    - Download and install Visual Studio Code from [here](https://code.visualstudio.com/).
+
+3. **Java Extension Pack**:
+    - Open Visual Studio Code.
+    - Go to Extensions (or press `Ctrl+Shift+X`), search for "Java Extension Pack", and click "Install".
+
+### Setting Up the Project
+
+1. **Open Project Folder**:
+    - Launch Visual Studio Code.
+    - Click on **File -> Open Folder** and select your Java project folder.
+
+2. **Configure JDK in Visual Studio Code**:
+    - Open the Command Palette (`Ctrl+Shift+P` or `Cmd+Shift+P` on macOS).
+    - Type "Java: Configure Java Runtime" and select it.
+    - Choose the installed JDK.
+
+3. **Create or Open Java Files**:
+    - Navigate to your Java source code (`src` folder).
+    - Create new Java files or open existing ones.
+
+### Running the Project
+
+1. **Run Java Application**:
+    - Open the Java file containing the main method.
+    - Right-click in the editor and choose **Run** or **Debug**.
+    - Alternatively, use the shortcut `Ctrl+F5` to run without debugging.
+
+2. **View Output**:
+    - The output will be displayed in the Terminal tab at the bottom of Visual Studio Code.
+
+### Debugging the Project
+
+1. **Set Breakpoints**:
+    - Click in the gutter next to a line of code to set a breakpoint.
+
+2. **Debug Java Application**:
+    - Open the Java file with breakpoints set.
+    - Right-click in the editor and choose **Debug**.
+    - Use the debug controls (`F5` to start debugging, `F10` for step over, `F11` for step into, etc.).
+
+### Additional Resources
+
+- [Visual Studio Code Java Documentation](https://code.visualstudio.com/docs/languages/java)
+- [Debugging in Visual Studio Code](https://code.visualstudio.com/docs/editor/debugging)
+
