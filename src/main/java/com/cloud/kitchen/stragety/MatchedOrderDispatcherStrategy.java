@@ -6,8 +6,6 @@ import com.cloud.kitchen.mediator.KitchenMediator;
 import java.util.Queue;
 
 public class MatchedOrderDispatcherStrategy implements OrderDispatcherStrategy {
-
-
     @Override
     public void dispatchOrder(KitchenMediator mediator, Queue<Order> readyOrders, Queue<Courier> waitingCouriers) {
         while (!waitingCouriers.isEmpty()) {

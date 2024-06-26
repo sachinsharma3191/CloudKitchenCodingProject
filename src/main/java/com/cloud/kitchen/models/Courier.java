@@ -11,7 +11,7 @@ public class   Courier {
 
     private Order assignedOrder;
 
-    private Courier(int courierId) {
+    public Courier(int courierId) {
         this.courierId = courierId;
         this.arrivalTime = currentMilliSeconds();
         this.dispatchTime = currentMilliSeconds();

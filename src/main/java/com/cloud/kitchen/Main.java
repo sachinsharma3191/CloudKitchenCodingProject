@@ -44,11 +44,18 @@ public class Main {
 
     public static void main(String[] args) {
         KitchenMediator kitchenMediator = getKitchenMediator();
-        kitchenMediator.setDispatchCommand(new MatchedOrderDispatcherStrategy());
 
         Simulation simulation = new Simulation(kitchenMediator);
-        simulation.processOrders();
+        // Run for FIFO Strategy
+        runSimulation(simulation, kitchenMediator);
 
+        // Run for  Matched Strategy
+        kitchenMediator.setDispatchCommand(new MatchedOrderDispatcherStrategy());
+        runSimulation(simulation,kitchenMediator);
+    }
+
+    private static void runSimulation(Simulation simulation, KitchenMediator kitchenMediator) {
+        simulation.processOrders();
         try {
             Thread.sleep(60000);
         } catch (InterruptedException e) {

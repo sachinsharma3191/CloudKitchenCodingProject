@@ -13,11 +13,10 @@ public class Order {
     public Order() {
     }
 
-    public Order(String id, String name, int prepTime, long readyTime) {
+    public Order(String id, String name, int prepTime) {
         this.id = id;
         this.name = name;
         this.prepTime = prepTime;
-        this.readyTime = readyTime;
     }
 
     public String getId() {

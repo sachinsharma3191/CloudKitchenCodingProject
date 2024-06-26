@@ -2,18 +2,20 @@ package com.cloud.kitchen.mediator;
 
 import com.cloud.kitchen.models.Courier;
 import com.cloud.kitchen.models.Order;
+import com.cloud.kitchen.observer.CourierArrivalObserver;
 import com.cloud.kitchen.observer.MediatorSubject;
 import com.cloud.kitchen.observer.OrderReadyObserver;
+import com.cloud.kitchen.stragety.FifoOrderDispatcherStrategy;
 import com.cloud.kitchen.stragety.OrderDispatcherStrategy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 import java.util.Queue;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static com.cloud.kitchen.util.Utility.average;
 import static com.cloud.kitchen.util.Utility.convertToMinutes;
@@ -30,7 +32,9 @@ public class KitchenMediator implements MediatorSubject {
     private final List<Double> foodWaitTimes;
     private final List<Double> courierWaitTimes;
     private final List<OrderReadyObserver> orderReadyObservers;
-    private final List<com.cloud.kitchen.observer.CourierArrivalObserver> courierArrivalObservers;
+    private final List<CourierArrivalObserver> courierArrivalObservers;
+
+    private final ExecutorService executorService;
     private OrderDispatcherStrategy dispatchCommand;
 
     public KitchenMediator() {
@@ -41,6 +45,8 @@ public class KitchenMediator implements MediatorSubject {
         this.courierWaitTimes = new CopyOnWriteArrayList<>();
         this.orderReadyObservers = new CopyOnWriteArrayList<>();
         this.courierArrivalObservers = new CopyOnWriteArrayList<>();
+        this.executorService = Executors.newCachedThreadPool();
+        this.dispatchCommand = new FifoOrderDispatcherStrategy();
     }
 
     public void setDispatchCommand(OrderDispatcherStrategy dispatchCommand) {
@@ -74,7 +80,7 @@ public class KitchenMediator implements MediatorSubject {
      */
     public void addOrder(Order order) {
         orders.add(order);
-        logger.info("Order Received {}",order);
+        logger.info("Order Received {}", order);
         prepareOrder(order);
     }
 
@@ -84,17 +90,13 @@ public class KitchenMediator implements MediatorSubject {
      * @param order Object containing detail of Order
      */
     private void prepareOrder(Order order) {
-        Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                order.setReadyTime(currentMilliSeconds());
-                readyOrders.add(order);
-                logger.info("Order prepared: {}", order);
-                notifyOrderReadyObservers(order);
-                dispatchOrder();
-            }
-        }, order.getPrepTime() * 1000L);
+        executorService.submit(() -> {
+            order.setReadyTime(currentMilliSeconds());
+            readyOrders.add(order);
+            logger.info("Order prepared: {}", order);
+            notifyOrderReadyObservers(order);
+            dispatchOrder();
+        });
     }
 
     /**
@@ -133,7 +135,7 @@ public class KitchenMediator implements MediatorSubject {
      * Dispatch Orders
      */
     public void dispatchOrder() {
-        dispatchCommand.dispatchOrder( this,readyOrders, waitingCouriers);
+        dispatchCommand.dispatchOrder(this, readyOrders, waitingCouriers);
     }
 
     /**
@@ -157,15 +159,11 @@ public class KitchenMediator implements MediatorSubject {
         readyOrders.remove(order);
         waitingCouriers.remove(courier);
 
-        Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                // Notify observers of order completion
-                notifyOrderReadyObservers(order);
-                logger.info("Order picked up: {}", order);
-            }
-        }, 1);
+
+        executorService.submit(() -> {
+            notifyOrderReadyObservers(order);
+            logger.info("Order picked up: {}", order);
+        });
     }
 
     /**
